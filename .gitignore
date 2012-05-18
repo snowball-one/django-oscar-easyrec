@@ -1,0 +1,14 @@
+*.pyc
+*.swp
+*.swo
+.project
+.pydevproject
+.settings
+django_oscar_easyrec.egg-info/
+*.*~
+nbproject
+.~lock.*
+dist/
+*.DS_Store
+.coverage
+htmlcov/*
