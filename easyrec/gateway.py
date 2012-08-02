@@ -1,17 +1,17 @@
-import urllib
-import httplib
+import requests
 import json
 
 
 class EasyRec():
 
-    _base_url = "/api/1.0/json/"
+    _base_url = "api/1.0/json/"
 
-    def __init__(self, host, port, tenant, api_key):
-        if host.startswith('http'):
-            raise RuntimeError("EASYREC_HOST should not include the http")
-        self._host = host
-        self._port = port
+    def __init__(self, endpoint, tenant, api_key):
+        if not endpoint.startswith('http'):
+            raise RuntimeError("EASYREC_ENDPOINT should include the http")
+        if endpoint.endswith("/"):
+            endpoint = endpoint[:-1]
+        self._endpoint = "/".join((endpoint, self._base_url))
         self._tenant = tenant
         self._api_key = api_key
 
@@ -88,23 +88,98 @@ class EasyRec():
         url = self._build_url('rate', options)
         return self._fetch_response(url)
 
+    def get_user_recommendations(self, user_id, max_results=None, item_type=None, action_type=None):
+        options = {
+            'apikey': self._api_key,
+            'tenantid': self._tenant,
+            'userid': user_id
+        }
+
+        if max_results:
+            options['numberOfResults'] = max_results
+
+        if item_type:
+            options['requesteditemtype'] = item_type
+
+        if action_type:
+            options['actiontype'] = action_type
+
+        url = self._build_url('recommendationsforuser', options)
+        return self._fetch_response(url)
+
+    def get_other_users_also_bought(self, item_id, user_id=None, max_results=None,
+                                    item_type=None, requested_item_type=None):
+
+        kwargs = {
+            'item_id': item_id,
+            'user_id': user_id,
+            'max_results': max_results,
+            'item_type': item_type,
+            'requested_item_type':requested_item_type
+        }
+        return self._get_item_based_recommendation('otherusersalsobought', **kwargs)
+
+    def get_other_users_also_viewed(self, item_id, user_id=None, max_results=None,
+                                    item_type=None, requested_item_type=None):
+        kwargs = {
+            'item_id': item_id,
+            'user_id': user_id,
+            'max_results': max_results,
+            'item_type': item_type,
+            'requested_item_type':requested_item_type
+        }
+        return self._get_item_based_recommendation('otherusersalsoviewed', **kwargs)
+
+    def get_related_items(self, item_id, max_results=None, assoc_type=None,
+                                    requested_item_type=None):
+        kwargs = {
+            'item_id': item_id,
+            'max_results': max_results,
+            'assoc_type': assoc_type,
+            'requested_item_type':requested_item_type
+        }
+        return self._get_item_based_recommendation('relateditems', **kwargs)
+
+    def _get_item_based_recommendation(self, recommendation_type, **kwargs):
+        options = {
+            'apikey': self._api_key,
+            'tenantid': self._tenant,
+            'itemid': kwargs['item_id'],
+        }
+
+        if kwargs.get('user_id'):
+            options['userid'] = kwargs['user_id']
+
+        if kwargs.get('max_results'):
+            options['numberOfResults'] = kwargs['max_results']
+
+        if kwargs.get('item_type'):
+            options['itemtype'] = kwargs['item_type']
+
+        if kwargs.get('requested_item_type'):
+            options['requesteditemtype'] = kwargs['requested_item_type']
+
+        if kwargs.get('assoc_type'):
+            options['assoctype'] = kwargs['assoc_type']
+
+        url = self._build_url(recommendation_type, options)
+        return self._fetch_response(url)
+
+
     def _build_url(self, path, options=None):
         if path.startswith('/'):
             path = path[1:]
         if path.endswith('/'):
             path = path[:-1]
-        url = "%s%s" % (self._base_url, path)
-
-        if options:
-            url = (url, urllib.urlencode(options)).join('?')
+        url = "%s%s" % (self._endpoint, path)
         return url
 
-    def _fetch_response(self, url, method="GET"):
-        conn = httplib.HTTPSConnection(self._host, self._port, timeout=30)
-        conn.request(method, url)
-        response = conn.getresponse()
-        raw_response = response.read()
-        if response.status != httplib.OK:
-            raise RuntimeError("Unable to communicate with easyrec (code: %s, response: %s)" % (response.status, raw_response))
-        conn.close()
-        return json.loads(raw_response)
+    def _fetch_response(self, url, method="GET", params=None):
+
+        func = {
+            'GET': requests.get,
+            'POST': requests.post
+        }.get(method, requests.get)
+        response = func(url, params=params)
+        response.raise_for_status()
+        return response.json

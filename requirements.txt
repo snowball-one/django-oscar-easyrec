@@ -3,4 +3,3 @@ mock==0.7.0
 django-nose==1.0
 nose==1.1.2
 pyzen==0.3.2
--e git://github.com/tangentlabs/django-oscar.git@a866994cba00b9ee8af120779ff1b5925f5bc1af#egg=django_oscar-dev

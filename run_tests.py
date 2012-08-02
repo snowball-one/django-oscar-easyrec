@@ -5,22 +5,27 @@ from optparse import OptionParser
 
 from django.conf import settings
 
-
 if not settings.configured:
-    datacash_settings = {}
+    extra_settings = {
+            'EASYREC_ENDPOINT': 'http://localhost:8080/easyrec-web/',
+            'EASYREC_TENENT_ID': 'EASYREC_DEMO',
+            'EASYREC_API_KEY': '98d32b149b0b55d2de495fa22a363341',
+    }
     try:
         from integration import *
     except ImportError:
-        datacash_settings.update({
-            'EASYREC_HOST': 'testserver.datacash.com',
-            'EASYREC_TENENT_ID': 'id',
-            'EASYREC_API_KEY': 'key',
-        })
+        pass
     else:
         for key, value in locals().items():
             if key.startswith('EASYREC'):
-                datacash_settings[key] = value
-                
+                extra_settings[key] = value
+
+    from oscar.defaults import *
+    for key, value in locals().items():
+        if key.startswith('OSCAR'):
+            extra_settings[key] = value
+    extra_settings['OSCAR_ALLOW_ANON_CHECKOUT'] = True
+
     settings.configure(
             DATABASES={
                 'default': {
@@ -33,34 +38,77 @@ if not settings.configured:
                 'django.contrib.contenttypes',
                 'django.contrib.sessions',
                 'django.contrib.sites',
+                'django.contrib.flatpages',
+                'oscar',
+                'oscar.apps.checkout',
+                'oscar.apps.partner',
+                'oscar.apps.customer',
+                'oscar.apps.shipping',
+                'oscar.apps.offer',
+                'oscar.apps.catalogue',
+                'oscar.apps.payment',
+                'oscar.apps.promotions',
+                'oscar.apps.voucher',
+                'oscar.apps.basket',
+                'oscar.apps.order',
+                'oscar.apps.address',
+                'oscar.apps.analytics',
+                'oscar.apps.dashboard.reports',
+                'oscar.apps.dashboard.catalogue',
+                'oscar.apps.dashboard.orders',
+                'oscar.apps.dashboard.orders',
+                'oscar.apps.dashboard.promotions',
                 'easyrec',
+                'south',
                 ],
+            MIDDLEWARE_CLASSES=(
+                'django.middleware.common.CommonMiddleware',
+                'django.contrib.sessions.middleware.SessionMiddleware',
+                'django.middleware.csrf.CsrfViewMiddleware',
+                'django.contrib.auth.middleware.AuthenticationMiddleware',
+                'django.contrib.messages.middleware.MessageMiddleware',
+                'django.middleware.transaction.TransactionMiddleware',
+                'oscar.apps.basket.middleware.BasketMiddleware',
+            ),
             DEBUG=False,
+            SOUTH_TESTS_MIGRATE=False,
+            HAYSTACK_SITECONF='oscar.search_sites',
+            HAYSTACK_SEARCH_ENGINE='dummy',
             SITE_ID=1,
-            **datacash_settings
+            ROOT_URLCONF='tests.urls',
+            NOSE_ARGS=['-s'],
+            **extra_settings
         )
 
-# Needs to be here to avoid missing SETTINGS env var
 from django_nose import NoseTestSuiteRunner
 
 
 def run_tests(*test_args):
+    if 'south' in settings.INSTALLED_APPS:
+        from south.management.commands import patch_for_test_db_setup
+        patch_for_test_db_setup()
+
     if not test_args:
         test_args = ['tests']
 
     # Run tests
-    test_runner = NoseTestSuiteRunner(verbosity=2)
+    test_runner = NoseTestSuiteRunner(verbosity=1)
 
-    c = coverage(source=['easyrec'], omit=['*tests*',])
-    c.start()
+    if 'coverage' in test_args:
+        c = coverage(source=['easyrec'], omit=['*migrations*', '*tests*'])
+        c.start()
+
     num_failures = test_runner.run_tests(test_args)
-    c.stop()
+
+    if 'coverage' in test_args:
+        c.stop()
 
     if num_failures > 0:
         sys.exit(num_failures)
-    print "Generating HTML coverage report"
-    c.html_report()
 
+    if 'coverage' in test_args:
+        print "Generating HTML coverage report"
+        c.html_report()
 
 def generate_migration():
     from south.management.commands.schemamigration import Command
