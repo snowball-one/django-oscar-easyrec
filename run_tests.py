@@ -8,7 +8,7 @@ from django.conf import settings
 if not settings.configured:
     extra_settings = {
             'EASYREC_ENDPOINT': 'http://localhost:8080/easyrec-web/',
-            'EASYREC_TENENT_ID': 'EASYREC_DEMO',
+            'EASYREC_TENANT_ID': 'EASYREC_DEMO',
             'EASYREC_API_KEY': '98d32b149b0b55d2de495fa22a363341',
     }
     try:
@@ -40,24 +40,12 @@ if not settings.configured:
                 'django.contrib.sites',
                 'django.contrib.flatpages',
                 'oscar',
-                'oscar.apps.checkout',
                 'oscar.apps.partner',
                 'oscar.apps.customer',
-                'oscar.apps.shipping',
-                'oscar.apps.offer',
                 'oscar.apps.catalogue',
-                'oscar.apps.payment',
                 'oscar.apps.promotions',
-                'oscar.apps.voucher',
-                'oscar.apps.basket',
                 'oscar.apps.order',
                 'oscar.apps.address',
-                'oscar.apps.analytics',
-                'oscar.apps.dashboard.reports',
-                'oscar.apps.dashboard.catalogue',
-                'oscar.apps.dashboard.orders',
-                'oscar.apps.dashboard.orders',
-                'oscar.apps.dashboard.promotions',
                 'easyrec',
                 'south',
                 ],
@@ -94,21 +82,20 @@ def run_tests(*test_args):
     # Run tests
     test_runner = NoseTestSuiteRunner(verbosity=1)
 
-    if 'coverage' in test_args:
-        c = coverage(source=['easyrec'], omit=['*migrations*', '*tests*'])
-        c.start()
+    c = coverage(source=['easyrec'], omit=['*migrations*', '*tests*'])
+    c.start()
 
     num_failures = test_runner.run_tests(test_args)
 
-    if 'coverage' in test_args:
-        c.stop()
+    c.stop()
 
     if num_failures > 0:
         sys.exit(num_failures)
 
-    if 'coverage' in test_args:
-        print "Generating HTML coverage report"
-        c.html_report()
+
+    print "Generating HTML coverage report..."
+    c.html_report()
+    print "Done\n"
 
 def generate_migration():
     from south.management.commands.schemamigration import Command

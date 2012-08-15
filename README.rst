@@ -30,15 +30,44 @@ Configuration
 
 Edit your ``settings.py`` to set the following settings::
 
-    EASYREC_HOST = 'intralife.researchstudio.at'
+    EASYREC_HOST = 'http://intralife.researchstudio.at'
     EASYREC_PORT = 8080
     EASYREC_TENENT_ID = '...'
     EASYREC_API_KEY = '...'
 
-And that's it! All purchases, product views and reviews will automatically be pushed to easyrec.
+And that's it! All purchases, product views and reviews will automatically be
+pushed to easyrec.
+
+You can also disable this app by setting `EASYREC_HOST` to 'DUMMY'.
+
+Getting Recommendations
+-----------------------
+
+django-oscar-easyrec comes with a templatetag allowing you to easily fetch
+recommendations and display them in your templates. There are currently 3
+supported template tags which do pretty much what they say::
+
+    {% load recommendations %}
+
+    {% user_recommendations a_user as recommendations %}
+    {% for recommended_product in recommendations %}
+        <!-- Do your thing! -->
+    {% endfor %}
+
+    {% users_also_bought a_user a_product as recommendations %}
+    {% for recommended_product in recommendations %}
+        <!-- Do your thing! -->
+    {% endfor %}
+
+    {% users_also_viewed a_user a_product as recommendations %}
+    {% for recommended_product in recommendations %}
+        <!-- Do your thing! -->
+    {% endfor %}
+
+Each template tag provides a list of recommended products. If no
+recommendations are found then an empty list is returned.
 
 TODO
 ----
 
-* Recommendation retrieval
 * Dashboard stats stuff

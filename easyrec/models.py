@@ -1,12 +1,6 @@
-from django.conf import settings
-
-from easyrec.gateway import EasyRec
 from easyrec.receivers import EasyRecListeners
+from easyrec.utils import get_gateway
 
 
-easyrec = EasyRec(getattr(settings, 'EASYREC_ENDPOINT',
-                  'http://intralife.researchstudio.at'),
-                  settings.EASYREC_TENENT_ID,
-                  settings.EASYREC_API_KEY)
-
+easyrec = get_gateway()
 EasyRecListeners(easyrec).register_listeners()
