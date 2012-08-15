@@ -3,3 +3,4 @@ mock==0.7.0
 django-nose==1.0
 nose==1.1.2
 pyzen==0.3.2
+flake8=1.4
