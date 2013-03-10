@@ -21,7 +21,7 @@ def user_recommendations(
     for the passed in user
     """
     return easyrec.get_user_recommendations(
-        user.user_id,
+        user.id,
         max_results,
         item_type,
         action_type
