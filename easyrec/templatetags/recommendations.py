@@ -8,14 +8,24 @@ register = template.Library()
 
 
 @register.assignment_tag
-def user_recommendations(user, max_results=None):
+def user_recommendations(
+    user,
+    max_results=None,
+    item_type=None,
+    action_type=None
+    ):
     """
     Usage: {% user_recommendations [user] as [var] %}
 
     Sets [var] to contain a list of recommended titles
     for the passed in user
     """
-    return easyrec.get_user_recommendations(user.user_id, max_results)
+    return easyrec.get_user_recommendations(
+        user.user_id,
+        max_results,
+        item_type,
+        action_type
+    )
 
 
 @register.assignment_tag
