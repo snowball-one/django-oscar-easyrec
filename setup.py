@@ -11,7 +11,13 @@ setup(name='django-oscar-easyrec',
       keywords="Recommendation, easyrec",
       license='BSD',
       packages=find_packages(exclude=['tests*',]),
-      install_requires=['django-oscar>=0.3', 'requests>=0.13'],
+      install_requires=[
+            'django-oscar>=0.5-pre-alpha',
+            'requests>=1.1.0,<1.2'
+      ],
+      dependency_links=[
+            'https://github.com/tangentlabs/django-oscar/tarball/master#egg=django-oscar-0.5-pre-alpha',
+      ],
       classifiers=['Environment :: Web Environment',
                    'Framework :: Django',
                    'Intended Audience :: Developers',

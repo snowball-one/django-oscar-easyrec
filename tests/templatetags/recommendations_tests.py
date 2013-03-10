@@ -43,10 +43,8 @@ def get_product_list(length=1):
 class RecommendationsTests(TestCase):
 
     def setUp(self):
-        self.product = get(Product)
-        self.product.parent = None
-        self.product.save()
-        response = {
+        self.product = get(Product, parent=None)
+        self.response = {
             'recommendeditems': {
                 'item': [
                     {'id': self.product.upc},
@@ -54,13 +52,13 @@ class RecommendationsTests(TestCase):
             }
         }
         self.dummy_easyrec = EasyRec("http://DUMMY", '', '')
-        self.dummy_easyrec._requests = DummyRequests(response)
+        self.dummy_easyrec._requests = DummyRequests(self.response)
 
     def test_recommendations_loads(self):
         with patch('easyrec.utils.get_gateway') as get_gateway:
             get_gateway.return_value = self.dummy_easyrec
 
-            rendered = Template(
+            Template(
                 '{% load recommendations %}'
             ).render(Context())
 
@@ -68,7 +66,7 @@ class RecommendationsTests(TestCase):
         with patch('easyrec.utils.get_gateway') as get_gateway:
             get_gateway.return_value = self.dummy_easyrec
 
-            rendered = Template(
+            Template(
                 '{% load recommendations %}'
                 '{% user_recommendations user as recommendations %}'
             ).render(Context({
@@ -76,17 +74,15 @@ class RecommendationsTests(TestCase):
             }))
 
     def test_user_recommendations_with_response(self):
-
         with patch('easyrec.utils.get_gateway') as get_gateway:
             get_gateway.return_value = self.dummy_easyrec
-            t = Template(
+            rendered =  Template(
                 '{% load recommendations %}'
                 '{% user_recommendations user as recommendations %}'
                 '{% for p in recommendations %}'
                 '{{ p.upc }}'
                 '{% endfor %}'
-            )
-            rendered = t.render(Context({
+            ).render(Context({
                 'user': get_auth_user_mock()
             }))
             self.assertEqual(self.product.upc, rendered)

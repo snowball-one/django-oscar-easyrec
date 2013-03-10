@@ -1,109 +1,143 @@
 #!/usr/bin/env python
+import os
 import sys
-from coverage import coverage
+import logging
+import tempfile
 from optparse import OptionParser
 
 from django.conf import settings
 
-if not settings.configured:
-    extra_settings = {
-            'EASYREC_ENDPOINT': 'http://localhost:8080/easyrec-web/',
-            'EASYREC_TENANT_ID': 'EASYREC_DEMO',
-            'EASYREC_API_KEY': '98d32b149b0b55d2de495fa22a363341',
-    }
-    try:
-        from integration import *
-    except ImportError:
-        pass
-    else:
-        for key, value in locals().items():
-            if key.startswith('EASYREC'):
-                extra_settings[key] = value
+from oscar.defaults import OSCAR_SETTINGS
+from oscar import OSCAR_MAIN_TEMPLATE_DIR, OSCAR_CORE_APPS
 
-    from oscar.defaults import *
-    for key, value in locals().items():
-        if key.startswith('OSCAR'):
-            extra_settings[key] = value
-    extra_settings['OSCAR_ALLOW_ANON_CHECKOUT'] = True
+location = lambda x: os.path.join(os.path.dirname(os.path.realpath(__file__)), x)
 
-    settings.configure(
+
+def configure(nose_args=None):
+    if not settings.configured:
+        settings.configure(
             DATABASES={
                 'default': {
                     'ENGINE': 'django.db.backends.sqlite3',
-                    }
-                },
-            INSTALLED_APPS=[
-                'django.contrib.auth',
-                'django.contrib.admin',
-                'django.contrib.contenttypes',
-                'django.contrib.sessions',
-                'django.contrib.sites',
-                'django.contrib.flatpages',
-                'oscar',
-                'oscar.apps.partner',
-                'oscar.apps.customer',
-                'oscar.apps.catalogue',
-                'oscar.apps.promotions',
-                'oscar.apps.order',
-                'oscar.apps.address',
-                'easyrec',
-                'south',
-                ],
+                    'NAME': ':memory:',
+                }
+            },
+            MEDIA_ROOT=location('public/media'),
+            MEDIA_URL='/media/',
+            STATIC_URL='/static/',
+            STATICFILES_DIRS=(location('static/'),),
+            STATIC_ROOT=location('public'),
+            STATICFILES_FINDERS=(
+                'django.contrib.staticfiles.finders.FileSystemFinder',
+                'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+                'compressor.finders.CompressorFinder',
+            ),
+            TEMPLATE_LOADERS=(
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ),
+            TEMPLATE_CONTEXT_PROCESSORS = (
+                "django.contrib.auth.context_processors.auth",
+                "django.core.context_processors.request",
+                "django.core.context_processors.debug",
+                "django.core.context_processors.i18n",
+                "django.core.context_processors.media",
+                "django.core.context_processors.static",
+                "django.contrib.messages.context_processors.messages",
+                # Oscar specific
+                'oscar.apps.search.context_processors.search_form',
+                'oscar.apps.promotions.context_processors.promotions',
+                'oscar.apps.checkout.context_processors.checkout',
+                'oscar.apps.customer.notifications.context_processors.notifications',
+                'oscar.core.context_processors.metadata',
+            ),
             MIDDLEWARE_CLASSES=(
                 'django.middleware.common.CommonMiddleware',
                 'django.contrib.sessions.middleware.SessionMiddleware',
                 'django.middleware.csrf.CsrfViewMiddleware',
                 'django.contrib.auth.middleware.AuthenticationMiddleware',
                 'django.contrib.messages.middleware.MessageMiddleware',
-                'django.middleware.transaction.TransactionMiddleware',
+                'debug_toolbar.middleware.DebugToolbarMiddleware',
                 'oscar.apps.basket.middleware.BasketMiddleware',
             ),
-            DEBUG=False,
-            SOUTH_TESTS_MIGRATE=False,
-            HAYSTACK_SITECONF='oscar.search_sites',
-            HAYSTACK_SEARCH_ENGINE='dummy',
-            SITE_ID=1,
-            ROOT_URLCONF='tests.urls',
-            NOSE_ARGS=['-s'],
-            **extra_settings
+            ROOT_URLCONF='sandbox.sandbox.urls',
+            TEMPLATE_DIRS=(
+                location('templates'),
+                os.path.join(OSCAR_MAIN_TEMPLATE_DIR, 'templates'),
+                OSCAR_MAIN_TEMPLATE_DIR,
+            ),
+            FANCYPAGES_TEMPLATE_DIRS=[
+                location('templates/fancypages/pages'),
+            ],
+            INSTALLED_APPS=[
+                'django.contrib.auth',
+                'django.contrib.contenttypes',
+                'django.contrib.sessions',
+                'django.contrib.sites',
+                'django.contrib.messages',
+                'django.contrib.staticfiles',
+                'django.contrib.admin',
+                'compressor',
+            ] + OSCAR_CORE_APPS + [
+                'easyrec',
+            ],
+            AUTHENTICATION_BACKENDS=(
+                'oscar.apps.customer.auth_backends.Emailbackend',
+                'django.contrib.auth.backends.ModelBackend',
+            ),
+            LOGIN_REDIRECT_URL='/accounts/',
+            APPEND_SLASH=True,
+            HAYSTACK_CONNECTIONS={
+                'default': {
+                    'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
+                },
+            },
+            NOSE_ARGS = nose_args,
+            EASYREC_ENDPOINT = "http://easyrec-test.com/",
+            EASYREC_API_KEY = "apikey",
+            EASYREC_TENANT_ID = "tenantid",
+            **OSCAR_SETTINGS
         )
 
-from django_nose import NoseTestSuiteRunner
+logging.disable(logging.CRITICAL)
 
 
 def run_tests(*test_args):
-    if 'south' in settings.INSTALLED_APPS:
-        from south.management.commands import patch_for_test_db_setup
-        patch_for_test_db_setup()
-
+    from django_nose import NoseTestSuiteRunner
+    test_runner = NoseTestSuiteRunner(verbosity=1)
     if not test_args:
         test_args = ['tests']
-
-    # Run tests
-    test_runner = NoseTestSuiteRunner(verbosity=1)
-
-    c = coverage(source=['easyrec'], omit=['*migrations*', '*tests*'])
-    c.start()
-
     num_failures = test_runner.run_tests(test_args)
-
-    c.stop()
-
-    if num_failures > 0:
+    if num_failures:
         sys.exit(num_failures)
-
-
-    print "Generating HTML coverage report..."
-    c.html_report()
-    print "Done\n"
-
-def generate_migration():
-    from south.management.commands.schemamigration import Command
-    com = Command()
-    com.handle(app='easyrec', initial=True)
 
 
 if __name__ == '__main__':
     parser = OptionParser()
-    (options, args) = parser.parse_args()
-    run_tests(*args)
+    parser.add_option('--with-coverage', dest='coverage', default=False,
+                      action='store_true')
+    parser.add_option('--with-xunit', dest='xunit', default=False,
+                      action='store_true')
+    parser.add_option('--collect-only', dest='collect', default=False,
+                      action='store_true')
+    options, args = parser.parse_args()
+
+    if options.collect:
+        # Show tests only so a bash autocompleter can use the results
+        configure(['-v'])
+        run_tests()
+    else:
+        # If no args, then use 'progressive' plugin to keep the screen real estate
+        # used down to a minimum. Otherwise, use the spec plugin
+        nose_args = ['-s', '-x',
+                    '--with-progressive' if not args else '--with-spec']
+
+        if options.coverage:
+            # Nose automatically uses any options passed to runtests.py, which is
+            # why the coverage trigger uses '--with-coverage' and why we don't need
+            # to explicitly include it here.
+            nose_args.extend([
+                '--cover-package=easyrec', '--cover-html',
+                '--cover-html-dir=htmlcov'])
+        configure(nose_args)
+        run_tests(*args)

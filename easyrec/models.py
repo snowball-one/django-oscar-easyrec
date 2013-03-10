@@ -3,4 +3,5 @@ from easyrec.utils import get_gateway
 
 
 easyrec = get_gateway()
-EasyRecListeners(easyrec).register_listeners()
+listeners = EasyRecListeners(easyrec)
+listeners.register_listeners()

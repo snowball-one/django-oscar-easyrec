@@ -9,7 +9,7 @@ from easyrec.receivers import EasyRecListeners
 
 def get_auth_user_mock():
     u = Mock()
-    u.user_id = 1
+    u.id = 1
     u.is_authenticated = Mock(return_value=True)
     return u
 
@@ -56,7 +56,7 @@ def get_mock_review():
     r.product = get_product_mock()
     r.user = get_auth_user_mock()
     r.score = 4
-    r.date_placed = datetime.fromtimestamp(100)
+    r.date_created = datetime.fromtimestamp(100)
     return r
 
 class EasyRecListenersTest(TestCase):

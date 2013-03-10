@@ -6,7 +6,7 @@ from easyrec.gateway import EasyRec, DummyRequests
 
 def get_gateway():
     endpoint = getattr(settings, 'EASYREC_ENDPOINT',
-                      'http://intralife.researchstudio.at')
+                      'http://intralife.researchstudio.at/easyrec-web')
 
     if 'DUMMY' == endpoint:
         easyrec = EasyRec("http://DUMMY", '', '')

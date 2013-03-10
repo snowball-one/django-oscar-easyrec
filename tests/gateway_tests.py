@@ -1,10 +1,17 @@
-from mock import Mock, patch
+from mock import Mock
 from unittest import TestCase
 from json import loads
+from datetime import datetime
 
+from httpretty import HTTPretty
+from httpretty import httprettified
+from django_dynamic_fixture import G
+from django.db.models.loading import get_model
 
 from easyrec.gateway import EasyRec
+from easyrec.errors import EasyRecException
 
+Product = get_model('catalogue', 'Product')
 
 class MockedResponseTestCase(TestCase):
 
@@ -14,7 +21,7 @@ class MockedResponseTestCase(TestCase):
         response.text = body
         response.json = None
         if is_json:
-            response.json = loads(body)
+            response.json = Mock(return_value=loads(body))
         response.status_code = status_code
         return response
 
@@ -23,117 +30,362 @@ class GatewayTest(MockedResponseTestCase):
 
     def setUp(self):
         self.gateway = EasyRec("http://some.com", 'tenant', 'key')
-        self.gateway._fetch_response = Mock(return_value="{}")
-        self.gateway._build_url = Mock(return_value="http://a_test.com")
 
     def test_base_url_is_checked(self):
         self.assertRaises(RuntimeError, EasyRec, "some.com", 'tenant', 'key')
 
     def test_get_url(self):
         expected = 'http://some.com/api/1.0/json/path'
-        gateway = EasyRec("http://some.com", 'tenant', 'key')
-        url = gateway._build_url('path')
+        url = self.gateway._build_url('path')
         self.assertEqual(expected, url)
-        url = gateway._build_url('/path')
+        url = self.gateway._build_url('/path')
         self.assertEqual(expected, url)
-        url = gateway._build_url('path/')
+        url = self.gateway._build_url('path/')
         self.assertEqual(expected, url)
-        url = gateway._build_url('/path/')
+        url = self.gateway._build_url('/path/')
         self.assertEqual(expected, url)
 
+    @httprettified
+    def test_get_item_types(self):
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemtypes",
+                           body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
+                           content_type="application/json")
+        item_types = self.gateway.get_item_types()
+        self.assertSequenceEqual(item_types, ['ITEM', 'LUBE'])
+
+    @httprettified
+    def test_get_item_type(self):
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemtypes",
+                           body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
+                           content_type="application/json")
+        item_type = self.gateway._get_item_type('lube')
+        self.assertSequenceEqual(item_type, 'LUBE')
+        item_type = self.gateway._get_item_type('i_do_not_exist')
+        self.assertSequenceEqual(item_type, 'ITEM')
+
+
+    @httprettified
+    def test_error_raises_exception(self):
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemtypes",
+                           body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
+                           content_type="application/json")
+
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/view",
+                           body='{"error": {"@code": 299, "@message": "Wrong APIKey/Tenant combination!"}}',
+                           content_type="application/json")
+        params = {
+            "session_id": "asession",
+            "item_id": 1234,
+            "item_desc": "an item",
+            "item_url": "http://a-shop.com/items/1234/",
+            "item_type":'ITEM',
+        }
+        try:
+            self.gateway.add_view(**params)
+        except EasyRecException as e:
+            self.assertEqual(e.message, "(299) Wrong APIKey/Tenant combination!")
+
+
+    @httprettified
     def test_add_view(self):
-        expected_options = {
-            'apikey': 'key',
-            'tenantid': 'tenant',
-            'sessionid': 'abc',
-            'itemid': 1,
-            'itemdescription': 'a description',
-            'itemurl': '/book/product-1',
-            'itemtype': 'ITEM',
-        }
-        self.gateway.add_view('abc', 1, 'a description', '/book/product-1')
-        self.gateway._build_url.assert_called_once_with('view')
-        self.gateway._fetch_response.assert_called_once_with('http://a_test.com', params=expected_options)
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemtypes",
+                           body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
+                           content_type="application/json")
 
+        params = {
+            "session_id": "asession",
+            "item_id": 1234,
+            "item_desc": "an item",
+            "item_url": "http://a-shop.com/items/1234/",
+            "item_type":'ITEM',
+            "user_id": 123,
+            "image_url": "http://a-shop/image.jpg",
+            "action_time": datetime.now()
+        }
+
+        expected_get_params = {
+            "tenantid": ["tenant"],
+            "apikey": ["key"],
+            "sessionid": ["asession"],
+            "itemid": ["1234"],
+            "itemdescription": ["an item"],
+            "itemurl": ["http://a-shop.com/items/1234/"],
+            "itemtype": ['ITEM'],
+            "userid": ["123"],
+            "imageurl": ["http://a-shop/image.jpg"],
+            "actiontime": [params["action_time"].strftime("%d_%m_%Y_%H_%M_%S")],
+        }
+
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/view",
+                           body='{"bob": "hoskin"}',
+                           content_type="application/json")
+
+        self.gateway.add_view(**params)
+        get_params = HTTPretty.last_request.querystring
+        self.assertEqual(get_params, expected_get_params)
+
+    @httprettified
     def test_add_buy(self):
-        expected_options = {
-            'apikey': 'key',
-            'tenantid': 'tenant',
-            'sessionid': 'abc',
-            'itemid': 1,
-            'itemdescription': 'a description',
-            'itemurl': '/book/product-1',
-            'itemtype': 'ITEM',
-        }
-        self.gateway.add_buy('abc', 1, 'a description', '/book/product-1')
-        self.gateway._build_url.assert_called_once_with('buy')
-        self.gateway._fetch_response.assert_called_once_with('http://a_test.com', params=expected_options)
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemtypes",
+                           body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
+                           content_type="application/json")
 
+        params = {
+            "session_id": "asession",
+            "item_id": 1234,
+            "item_desc": "an item",
+            "item_url": "http://a-shop.com/items/1234/",
+            "item_type":'ITEM',
+            "user_id": 123,
+            "image_url": "http://a-shop/image.jpg",
+            "action_time": datetime.now()
+        }
+
+        expected_get_params = {
+            "tenantid": ["tenant"],
+            "apikey": ["key"],
+            "sessionid": ["asession"],
+            "itemid": ["1234"],
+            "itemdescription": ["an item"],
+            "itemurl": ["http://a-shop.com/items/1234/"],
+            "itemtype": ['ITEM'],
+            "userid": ["123"],
+            "imageurl": ["http://a-shop/image.jpg"],
+            "actiontime": [params["action_time"].strftime("%d_%m_%Y_%H_%M_%S")]
+        }
+
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/buy",
+                           body='{"bob": "hoskin"}',
+                           content_type="application/json")
+
+        self.gateway.add_buy(**params)
+        get_params = HTTPretty.last_request.querystring
+        self.assertEqual(get_params, expected_get_params)
+
+    @httprettified
     def test_add_rating(self):
-        expected_options = {
-            'apikey': 'key',
-            'tenantid': 'tenant',
-            'sessionid': 'abc',
-            'itemid': 1,
-            'itemdescription': 'a description',
-            'itemurl': '/book/product-1',
-            'itemtype': 'ITEM',
-            'ratingvalue': 5
-        }
-        self.gateway.add_rating('abc', 1, 'a description', '/book/product-1', 5)
-        self.gateway._build_url.assert_called_once_with('rate')
-        self.gateway._fetch_response.assert_called_once_with('http://a_test.com', params=expected_options)
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemtypes",
+                           body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
+                           content_type="application/json")
 
+        params = {
+            "session_id": "asession",
+            "item_id": 1234,
+            "item_desc": "an item",
+            "item_url": "http://a-shop.com/items/1234/",
+            "item_type":'ITEM',
+            "rating": 5,
+            "user_id": 123,
+            "image_url": "http://a-shop/image.jpg",
+            "action_time": datetime.now()
+        }
+
+        expected_get_params = {
+            "tenantid": ["tenant"],
+            "apikey": ["key"],
+            "sessionid": ["asession"],
+            "itemid": ["1234"],
+            "itemdescription": ["an item"],
+            "itemurl": ["http://a-shop.com/items/1234/"],
+            "itemtype": ['ITEM'],
+            "ratingvalue": ["5"],
+            "userid": ["123"],
+            "imageurl": ["http://a-shop/image.jpg"],
+            "actiontime": [params["action_time"].strftime("%d_%m_%Y_%H_%M_%S")]
+        }
+
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/rate",
+                           body='{"bob": "hoskin"}',
+                           content_type="application/json")
+
+        self.gateway.add_rating(**params)
+        get_params = HTTPretty.last_request.querystring
+        self.assertEqual(get_params, expected_get_params)
+
+    @httprettified
+    def test_add_action(self):
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemtypes",
+                           body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
+                           content_type="application/json")
+
+        params = {
+            "session_id": "asession",
+            "item_id": 1234,
+            "item_desc": "an item",
+            "item_url": "http://a-shop.com/items/1234/",
+            "item_type":'ITEM',
+            "action": "like",
+            "user_id": 123,
+            "image_url": "http://a-shop/image.jpg",
+            "action_time": datetime.now(),
+            "value": 7
+        }
+
+        expected_get_params = {
+            "tenantid": ["tenant"],
+            "apikey": ["key"],
+            "sessionid": ["asession"],
+            "itemid": ["1234"],
+            "itemdescription": ["an item"],
+            "itemurl": ["http://a-shop.com/items/1234/"],
+            "itemtype": ['ITEM'],
+            "actiontype": ["like"],
+            "userid": ["123"],
+            "imageurl": ["http://a-shop/image.jpg"],
+            "actiontime": [params["action_time"].strftime("%d_%m_%Y_%H_%M_%S")],
+            "actionvalue": ["7"]
+        }
+
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/rate",
+                           body='{"bob": "hoskin"}',
+                           content_type="application/json")
+
+        self.gateway.add_action(**params)
+        get_params = HTTPretty.last_request.querystring
+        print expected_get_params
+        print get_params
+        self.assertEqual(expected_get_params, get_params)
+
+    @httprettified
     def test_get_user_recommendations(self):
-        expected_options = {
-            'apikey': 'key',
-            'tenantid': 'tenant',
-            'userid': 123,
-        }
-        self.gateway.get_user_recommendations(123)
-        self.gateway._build_url.assert_called_once_with('recommendationsforuser')
-        self.gateway._fetch_response.assert_called_once_with('http://a_test.com', params=expected_options)
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemtypes",
+                           body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
+                           content_type="application/json")
+        product = G(Product, parent=None)
 
+        params = {
+            "user_id": "auser",
+            "max_results": 15,
+            "item_type": "item",
+            "action_type": "view"
+        }
+
+        expected_get_params = {
+            "tenantid": ["tenant"],
+            "apikey": ["key"],
+            "userid": ["auser"],
+            "numberOfResults": ["15"],
+            "requesteditemtype": ["ITEM"],
+            "actiontype": ["view"]
+        }
+        expected_response = '{"recommendeditems": {"item": [{"id": %s}]}}' % product.upc
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/recommendationsforuser",
+                           body=expected_response,
+                           content_type="application/json")
+
+        response = self.gateway.get_user_recommendations(**params)
+        get_params = HTTPretty.last_request.querystring
+        self.assertEqual(get_params, expected_get_params)
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0].upc, product.upc)
+
+    @httprettified
     def test_get_other_users_also_bought(self):
-        expected_options = {
-            'apikey': 'key',
-            'tenantid': 'tenant',
-            'itemid': 54321,
-        }
-        self.gateway.get_other_users_also_bought(54321)
-        self.gateway._build_url.assert_called_once_with('otherusersalsobought')
-        self.gateway._fetch_response.assert_called_once_with('http://a_test.com', params=expected_options)
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemtypes",
+                           body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
+                           content_type="application/json")
+        product = G(Product, parent=None)
 
+        params = {
+            "user_id": "auser",
+            "item_id": 1234,
+            "max_results": 10,
+            "item_type": "ITEM",
+            "requested_item_type": "LUBE"
+        }
+
+        expected_get_params = {
+            "tenantid": ["tenant"],
+            "apikey": ["key"],
+            "userid": ["auser"],
+            "itemid": ["1234"],
+            "numberOfResults": ["10"],
+            "itemtype": ["ITEM"],
+            "requesteditemtype": ["LUBE"]
+        }
+        expected_response = '{"recommendeditems": {"item": [{"id": %s}]}}' % product.upc
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/otherusersalsobought",
+                           body=expected_response,
+                           content_type="application/json")
+
+        response = self.gateway.get_other_users_also_bought(**params)
+        get_params = HTTPretty.last_request.querystring
+        self.assertItemsEqual(get_params, expected_get_params)
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0].upc, product.upc)
+
+    @httprettified
     def test_get_other_users_also_viewed(self):
-        expected_options = {
-            'apikey': 'key',
-            'tenantid': 'tenant',
-            'itemid': 54321,
+        product = G(Product, parent=None)
+
+        params = {
+            "user_id": "auser",
+            "item_id": 1234
         }
-        self.gateway.get_other_users_also_viewed(54321)
-        self.gateway._build_url.assert_called_once_with('otherusersalsoviewed')
-        self.gateway._fetch_response.assert_called_once_with('http://a_test.com', params=expected_options)
 
-    def test_related_items(self):
-        expected_options = {
-            'apikey': 'key',
-            'tenantid': 'tenant',
-            'itemid': 54321,
+        expected_get_params = {
+            "tenantid": "tenant",
+            "apikey": "key",
+            "userid": "auser",
+            "itemid": "1234"
         }
-        self.gateway.get_related_items(54321)
-        self.gateway._build_url.assert_called_once_with('relateditems')
-        self.gateway._fetch_response.assert_called_once_with('http://a_test.com', params=expected_options)
+        expected_response = '{"recommendeditems": {"item": [{"id": %s}]}}' % product.upc
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/otherusersalsoviewed",
+                           body=expected_response,
+                           content_type="application/json")
 
-    def test_fetch_response_for_posting(self):
+        response = self.gateway.get_other_users_also_viewed(**params)
+        get_params = HTTPretty.last_request.querystring
+        self.assertItemsEqual(get_params, expected_get_params)
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0].upc, product.upc)
 
-        gateway = EasyRec("http://some.com", 'tenant', 'key')
+    @httprettified
+    def test_get_items_rated_as_good_by_other_users(self):
+        product = G(Product, parent=None)
 
-        with patch('requests.post') as post:
-            post.return_value = self.create_mock_response('{"bob": "hoskins"}', is_json=True)
-            url = "http://a_site.com"
-            method = 'POST'
-            params = {'A': 'B'}
+        params = {
+            "user_id": "auser",
+            "item_id": 1234
+        }
 
-            response = gateway._fetch_response(url, method, params);
-            post.assert_called_with(url, params=params)
+        expected_get_params = {
+            "tenantid": "tenant",
+            "apikey": "key",
+            "userid": "auser",
+            "itemid": "1234"
+        }
+        expected_response = '{"recommendeditems": {"item": [{"id": %s}]}}' % product.upc
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemsratedgoodbyotherusers",
+                           body=expected_response,
+                           content_type="application/json")
 
+        response = self.gateway.get_items_rated_as_good_by_other_users(**params)
+        get_params = HTTPretty.last_request.querystring
+        self.assertItemsEqual(get_params, expected_get_params)
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0].upc, product.upc)
+
+    @httprettified
+    def test_get_related_items(self):
+        product = G(Product, parent=None)
+
+        params = {
+            "item_id": 1234
+        }
+
+        expected_get_params = {
+            "tenantid": "tenant",
+            "apikey": "key",
+            "itemid": "1234"
+        }
+        expected_response = '{"recommendeditems": {"item": [{"id": %s}]}}' % product.upc
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/relateditems",
+                           body=expected_response,
+                           content_type="application/json")
+
+        response = self.gateway.get_related_items(**params)
+        get_params = HTTPretty.last_request.querystring
+        self.assertItemsEqual(get_params, expected_get_params)
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0].upc, product.upc)
