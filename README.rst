@@ -51,7 +51,7 @@ You can also disable this app by setting `EASYREC_HOST` to 'DUMMY'. Useful for
 testing.
 
 Getting Recommendations
------------------------
+=======================
 
 django-oscar-easyrec comes with a templatetag allowing you to easily fetch
 recommendations and display them in your templates. There are currently 5
@@ -98,7 +98,7 @@ You can also call the recommendation functions directly::
 
 
 user_recommendations
-++++++++++++++++++++
+--------------------
 
 Returns a list of recommended items for a user
 
@@ -116,7 +116,7 @@ action_type
     VIEW
 
 users_also_bought
-+++++++++++++++++
+-----------------
 
 Returns a list of recommended items based on users who bought this all bought X
 
@@ -132,7 +132,7 @@ requested_item_type
     [optional] The ProductClass of the items you want in the response
 
 users_also_viewed
-+++++++++++++++++
+-----------------
 
 Returns a list of recommended items based on users who viewed this all viewed X
 
@@ -148,7 +148,7 @@ requested_item_type
     [optional] The ProductClass of the items you want in the response
 
 products_rated_good
-+++++++++++++++++++
+-------------------
 
 Returns a list of recommended items based on users who rated this as good also
 rated X as good.
@@ -165,7 +165,7 @@ requested_item_type
     [optional] The ProductClass of the items you want in the response
 
 related_products
-++++++++++++++++
+----------------
 
 Returns a list of items related to the supplied one
 
@@ -184,6 +184,24 @@ assoc_type
 requested_item_type
     [optional] The ProductClass of the items you want in the response
 
+Vagrant
+=======
+
+To make testing and development easier I have created a vagrant box with
+easyrec already installed and configured. If you have vagrant install you
+can simply perform the following::
+
+	vagrant up
+
+The box itself is hosted on Dropbox and the initial download and install will
+take a *long* time.
+
+Once the box is up you can acces easyrec using::
+
+	http://127.0.0.1:9090/easyrec-web
+
+The username and password to log in are both `easyrec`. The box also runs
+MySQL with the password of the root user set to `root`.
 
 TODO
 ----
