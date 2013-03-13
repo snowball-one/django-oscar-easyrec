@@ -1,10 +1,15 @@
 from unittest import TestCase
 from mock import Mock, patch
+from json import dumps
+
 from django.template import Template, Context
-from django_dynamic_fixture import get
+from django_dynamic_fixture import G
 from django.db.models import get_model
 
-from easyrec.gateway import EasyRec, DummyRequests
+from httpretty import HTTPretty
+from httpretty import httprettified
+
+from easyrec.gateway import EasyRec
 
 
 Product = get_model('catalogue','Product')
@@ -17,72 +22,125 @@ def get_auth_user_mock():
     return u
 
 
-def get_product_mock():
-    pc = Mock()
-    pc.name = 'Product Class'
-    p = Mock()
-    p.upc = '12345'
-    p.get_title = Mock(return_value="Product Title")
-    p.images = Mock()
-    p.images.count = Mock(return_value=0)
-    p.get_absolute_url = Mock(return_value="http://a.test.com/product/prduct-title-12345")
-    p.get_product_class.name = "Product Class"
-    pclass = Mock()
-    pclass.name = 'ITEM'
-    p.get_product_class = Mock(return_value=pclass)
-    return p
-
-
 def get_product_list(length=1):
     products = []
     for i in range(length):
-        products.append(get_product_mock())
+        products.append(G(Product))
     return products
 
 
 class RecommendationsTests(TestCase):
 
     def setUp(self):
-        self.product = get(Product, parent=None)
-        self.response = {
+        self.product = G(Product, parent=None)
+        self.recommendations = dumps({
             'recommendeditems': {
                 'item': [
                     {'id': self.product.upc},
                 ]
             }
-        }
-        self.dummy_easyrec = EasyRec("http://DUMMY", '', '')
-        self.dummy_easyrec._requests = DummyRequests(self.response)
+        })
 
     def test_recommendations_loads(self):
-        with patch('easyrec.utils.get_gateway') as get_gateway:
-            get_gateway.return_value = self.dummy_easyrec
+        Template(
+            '{% load recommendations %}'
+        ).render(Context())
+        self.assertTrue(True)
 
-            Template(
-                '{% load recommendations %}'
-            ).render(Context())
-
+    @httprettified
     def test_user_recommendations_with_empty_response(self):
-        with patch('easyrec.utils.get_gateway') as get_gateway:
-            get_gateway.return_value = self.dummy_easyrec
+        HTTPretty.register_uri(HTTPretty.GET, "http://easyrec-test.com/api/1.0/json/recommendationsforuser",
+                           body='{"b": "b"}',
+                           content_type="application/json")
 
-            Template(
-                '{% load recommendations %}'
-                '{% user_recommendations user as recommendations %}'
-            ).render(Context({
-                'user': get_auth_user_mock()
-            }))
+        rendered = Template(
+            '{% load recommendations %}'
+            '{% user_recommendations user as recommendations %}'
+        ).render(Context({
+            'user': get_auth_user_mock()
+        }))
+        self.assertEqual('', rendered)
 
+    @httprettified
     def test_user_recommendations_with_response(self):
-        with patch('easyrec.utils.get_gateway') as get_gateway:
-            get_gateway.return_value = self.dummy_easyrec
-            rendered =  Template(
-                '{% load recommendations %}'
-                '{% user_recommendations user as recommendations %}'
-                '{% for p in recommendations %}'
-                '{{ p.upc }}'
-                '{% endfor %}'
-            ).render(Context({
-                'user': get_auth_user_mock()
-            }))
-            self.assertEqual(self.product.upc, rendered)
+        HTTPretty.register_uri(HTTPretty.GET, "http://easyrec-test.com/api/1.0/json/recommendationsforuser",
+                           body=self.recommendations,
+                           content_type="application/json")
+        rendered =  Template(
+            '{% load recommendations %}'
+            '{% user_recommendations user as recommendations %}'
+            '{% for p in recommendations %}'
+            '{{ p.upc }}'
+            '{% endfor %}'
+        ).render(Context({
+            'user': get_auth_user_mock()
+        }))
+        self.assertEqual(self.product.upc, rendered)
+
+    @httprettified
+    def test_products_rated_good(self):
+        HTTPretty.register_uri(HTTPretty.GET, "http://easyrec-test.com/api/1.0/json/itemsratedgoodbyotherusers",
+                           body=self.recommendations,
+                           content_type="application/json")
+        rendered =  Template(
+            '{% load recommendations %}'
+            '{% products_rated_good product user as recommendations %}'
+            '{% for p in recommendations %}'
+            '{{ p.upc }}'
+            '{% endfor %}'
+        ).render(Context({
+            'product': G(Product),
+            'user': get_auth_user_mock()
+        }))
+        self.assertEqual(self.product.upc, rendered)
+
+    @httprettified
+    def test_related_products(self):
+        HTTPretty.register_uri(HTTPretty.GET, "http://easyrec-test.com/api/1.0/json/relateditems",
+                           body=self.recommendations,
+                           content_type="application/json")
+        rendered =  Template(
+            '{% load recommendations %}'
+            '{% related_products product user as recommendations %}'
+            '{% for p in recommendations %}'
+            '{{ p.upc }}'
+            '{% endfor %}'
+        ).render(Context({
+            'product': G(Product),
+            'user': get_auth_user_mock()
+        }))
+        self.assertEqual(self.product.upc, rendered)
+
+    @httprettified
+    def test_users_also_viewed(self):
+        HTTPretty.register_uri(HTTPretty.GET, "http://easyrec-test.com/api/1.0/json/otherusersalsoviewed",
+                           body=self.recommendations,
+                           content_type="application/json")
+        rendered =  Template(
+            '{% load recommendations %}'
+            '{% users_also_viewed product user as recommendations %}'
+            '{% for p in recommendations %}'
+            '{{ p.upc }}'
+            '{% endfor %}'
+        ).render(Context({
+            'product': G(Product),
+            'user': get_auth_user_mock()
+        }))
+        self.assertEqual(self.product.upc, rendered)
+
+    @httprettified
+    def test_users_also_bought(self):
+        HTTPretty.register_uri(HTTPretty.GET, "http://easyrec-test.com/api/1.0/json/otherusersalsobought",
+                           body=self.recommendations,
+                           content_type="application/json")
+        rendered =  Template(
+            '{% load recommendations %}'
+            '{% users_also_bought product user as recommendations %}'
+            '{% for p in recommendations %}'
+            '{{ p.upc }}'
+            '{% endfor %}'
+        ).render(Context({
+            'product': G(Product),
+            'user': get_auth_user_mock()
+        }))
+        self.assertEqual(self.product.upc, rendered)

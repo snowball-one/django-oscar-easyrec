@@ -1,6 +1,4 @@
-from mock import Mock
 from unittest import TestCase
-from json import loads
 from datetime import datetime
 
 from httpretty import HTTPretty
@@ -13,20 +11,8 @@ from easyrec.errors import EasyRecException
 
 Product = get_model('catalogue', 'Product')
 
-class MockedResponseTestCase(TestCase):
 
-    def create_mock_response(self, body, status_code=200, is_json=False):
-        response = Mock()
-        response.content = body
-        response.text = body
-        response.json = None
-        if is_json:
-            response.json = Mock(return_value=loads(body))
-        response.status_code = status_code
-        return response
-
-
-class GatewayTest(MockedResponseTestCase):
+class GatewayTest(TestCase):
 
     def setUp(self):
         self.gateway = EasyRec("http://some.com", 'tenant', 'key')
@@ -242,8 +228,6 @@ class GatewayTest(MockedResponseTestCase):
 
         self.gateway.add_action(**params)
         get_params = HTTPretty.last_request.querystring
-        print expected_get_params
-        print get_params
         self.assertEqual(expected_get_params, get_params)
 
     @httprettified

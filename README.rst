@@ -41,7 +41,7 @@ will send the default value of 'ITEM'.
 So each or you product classes need to manually added as an itemtype via
 easyrecs dashboard if you want them to be recorded separately.
 
-Note - if you add item typs to easyrec you will need to restart your django
+Note - if you add item types to easyrec you will need to restart your django
 project to ensure they are picked up correctly.
 
 And that's it! All purchases, product views and reviews will automatically be
@@ -90,4 +90,3 @@ TODO
 
 * Dashboard stats
 * Optional Celery delayed inserts
-* Allow for custom actions

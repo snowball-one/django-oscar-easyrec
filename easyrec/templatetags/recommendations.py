@@ -1,6 +1,9 @@
 from easyrec.utils import get_gateway
 
 from django import template
+from django.db.models import get_model
+
+Product = get_model('catalogue', 'Product')
 
 easyrec = get_gateway()
 
@@ -45,13 +48,16 @@ def users_also_bought(
     user_id = None
     if user:
         user_id = user.id
-    return easyrec.get_other_users_also_bought(
-        product.upc,
-        user_id,
-        max_results,
-        item_type,
-        requested_item_type
-    )
+    try:
+        return easyrec.get_other_users_also_bought(
+            product.upc,
+            user_id,
+            max_results,
+            item_type,
+            requested_item_type
+        )
+    except:
+        return Product.objects.none()
 
 
 @register.assignment_tag
@@ -72,13 +78,16 @@ def users_also_viewed(
     if user:
         user_id = user.id
 
-    return easyrec.get_other_users_also_viewed(
-        product.upc,
-        user_id,
-        max_results,
-        item_type,
-        requested_item_type
-    )
+    try:
+        return easyrec.get_other_users_also_viewed(
+            product.upc,
+            user_id,
+            max_results,
+            item_type,
+            requested_item_type
+        )
+    except:
+        return Product.objects.none()
 
 
 @register.assignment_tag
@@ -92,17 +101,20 @@ def products_rated_good(
     user_id = None
     if user:
         user_id = user.id
-    return easyrec.get_items_rated_as_good_by_other_users(
-        product.upc,
-        user_id,
-        max_results,
-        item_type,
-        requested_item_type
-    )
+    try:
+        return easyrec.get_items_rated_as_good_by_other_users(
+            product.upc,
+            user_id,
+            max_results,
+            item_type,
+            requested_item_type
+        )
+    except:
+        return Product.objects.none()
 
 
 @register.assignment_tag
-def related_items(
+def related_products(
         product,
         max_results=None,
         assoc_type=None,
