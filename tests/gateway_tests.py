@@ -240,7 +240,7 @@ class GatewayTest(TestCase):
         params = {
             "user_id": "auser",
             "max_results": 15,
-            "item_type": "item",
+            "requested_item_type": "item",
             "action_type": "view"
         }
 

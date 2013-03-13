@@ -14,7 +14,7 @@ register = template.Library()
 def user_recommendations(
     user,
     max_results=None,
-    item_type=None,
+    requested_item_type=None,
     action_type=None
     ):
     """
@@ -26,7 +26,7 @@ def user_recommendations(
     return easyrec.get_user_recommendations(
         user.id,
         max_results,
-        item_type,
+        requested_item_type,
         action_type
     )
 
@@ -36,7 +36,6 @@ def users_also_bought(
         product,
         user=None,
         max_results=None,
-        item_type=None,
         requested_item_type=None
     ):
     """
@@ -53,7 +52,7 @@ def users_also_bought(
             product.upc,
             user_id,
             max_results,
-            item_type,
+            product.get_product_class().name,
             requested_item_type
         )
     except:
@@ -65,7 +64,6 @@ def users_also_viewed(
         product,
         user=None,
         max_results=None,
-        item_type=None,
         requested_item_type=None
     ):
     """
@@ -83,7 +81,7 @@ def users_also_viewed(
             product.upc,
             user_id,
             max_results,
-            item_type,
+            product.get_product_class().name,
             requested_item_type
         )
     except:
@@ -95,7 +93,6 @@ def products_rated_good(
         product,
         user=None,
         max_results=None,
-        item_type=None,
         requested_item_type=None
     ):
     user_id = None
@@ -106,7 +103,7 @@ def products_rated_good(
             product.upc,
             user_id,
             max_results,
-            item_type,
+            product.get_product_class().name,
             requested_item_type
         )
     except:

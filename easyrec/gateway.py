@@ -151,7 +151,7 @@ class EasyRec():
         return self._fetch_response(url, params=options)
 
     def get_user_recommendations(self, user_id, max_results=None,
-        item_type=None, action_type=None):
+        requested_item_type=None, action_type=None):
         options = {
             'apikey': self._api_key,
             'tenantid': self._tenant,
@@ -161,8 +161,8 @@ class EasyRec():
         if max_results:
             options['numberOfResults'] = max_results
 
-        if item_type:
-            options['requesteditemtype'] = self._get_item_type(item_type)
+        if requested_item_type:
+            options['requesteditemtype'] = self._get_item_type(requested_item_type)
 
         if action_type:
             options['actiontype'] = action_type
