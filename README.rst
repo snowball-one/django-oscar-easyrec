@@ -27,7 +27,9 @@ or from Github::
 
     pip install git+git://github.com/tangentlabs/django-oscar-easyrec.git#egg=django-oscar-easyrec
 
-Add ``'easyrec'`` to ``INSTALLED_APPS``
+Add ``'easyrec'`` to ``INSTALLED_APPS``.
+
+You will also need to install 
 
 Configuration
 -------------
@@ -38,20 +40,20 @@ Edit your ``settings.py`` to set the following settings::
     EASYREC_TENANT_ID = '...'
     EASYREC_API_KEY = '...'
 
-In easyrec all items have an itemtype. django-oscar-easyrec passes the product
+In easyrec all items have an 'itemtype'. django-oscar-easyrec passes the product
 class name for this value. If the item type is not registered in easyrec it
 will send the default value of 'ITEM'.
 
 So each of your product classes needs to manually added as an itemtype via
-easyrecs dashboard if you want them to be recorded separately.
+easyrec's dashboard if you want them to be recorded separately.
 
-Note - if you add item types to easyrec you will need to restart your django
+Note - if you add itemtypes to easyrec you will need to restart your django
 project to ensure they are picked up correctly.
 
 And that's it! All purchases, product views and reviews will automatically be
 pushed to easyrec.
 
-You can also disable this app by setting `EASYREC_HOST` to 'DUMMY'. Useful for
+You can also disable this app by setting `EASYREC_HOST` to `'DUMMY'`. Useful for
 testing.
 
 Getting Recommendations
@@ -95,6 +97,7 @@ tags also supports a number of other optional parameters.
 You can also call the recommendation functions directly::
 
     from easyrec.utils import get_gateway
+
     easyrec = get_gateway()
     recommendations = easyrec.get_user_recommendations(user.user_id)
     recommendations = easyrec.get_other_users_also_bought(product.upc, user_id)
@@ -188,19 +191,35 @@ assoc_type
 requested_item_type
     [optional] The ProductClass of the items you want in the response
 
+Contributing
+============
+
+Clone the repo, create a virtualenv and run::
+
+    make install
+
+You can run the tests with::
+
+    ./run_tests.py
+
+There is a sample Oscar project that uses this package in the 'sandbox' folder.
+You can set it up using::
+
+    make sandbox
+
 Vagrant
-=======
+-------
 
 To make testing and development easier I have created a vagrant box with
-easyrec already installed and configured. If you have vagrant install you
+easyrec already installed and configured. If you have vagrant installed, you
 can simply perform the following::
 
 	vagrant up
 
-The box itself is hosted on Dropbox and the initial download and install will
-take a *long* time. So kick back and tasty hot beverage...
+The box itself is hosted on Dropbox and so the initial download and install will
+take a *long* time. So kick back and get yourself a tasty hot beverage...
 
-Once the box is up you can acces easyrec using::
+Once the box is up you can access easyrec using::
 
 	http://127.0.0.1:9090/easyrec-web
 
