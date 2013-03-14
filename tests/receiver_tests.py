@@ -74,6 +74,7 @@ class EasyRecListenersTest(TestCase):
     def setUp(self):
         self.gateway = EasyRec("http://some.com", 'tenant', 'key')
         self.listeners = EasyRecListeners(self.gateway)
+        self.maxDiff=1000
 
     @httprettified
     def test_on_product_view(self):

@@ -8,7 +8,7 @@ from easyrec.errors import EasyRecException
 Product = get_model('catalogue', 'Product')
 
 
-class EasyRec():
+class EasyRec(object):
 
     _base_url = "api/1.0/json/"
     _default_item_type = 'ITEM'
