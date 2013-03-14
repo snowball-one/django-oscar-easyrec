@@ -8,6 +8,11 @@ integrate seamlessly with the e-commerce framework `django-oscar`_.
 .. _`easyrec`: http://easyrec.org/
 .. _`django-oscar`: https://github.com/tangentlabs/django-oscar
 
+Continuous integration status:
+
+.. image:: https://secure.travis-ci.org/tangentlabs/django-oscar-easyrec.png
+    :target: http://travis-ci.org/#!/tangentlabs/django-oscar-easyrec
+
 Getting started
 ===============
 
