@@ -201,7 +201,7 @@ Once the box is up you can acces easyrec using::
 	http://127.0.0.1:9090/easyrec-web
 
 The username and password to log in are both `easyrec`. The box also runs
-MySQL with the password of the root user set to `root`.
+MySQL (`root`:`root`) and Tomcat-admin (`tomcat`:`tomcat`)
 
 TODO
 ----
