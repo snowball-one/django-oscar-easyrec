@@ -37,7 +37,7 @@ class GatewayTest(TestCase):
                            body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
                            content_type="application/json")
         item_types = self.gateway.get_item_types()
-        self.assertSequenceEqual(item_types, ['ITEM', 'LUBE'])
+        self.assertEqual(item_types, ['ITEM', 'LUBE'])
 
     @httprettified
     def test_get_item_type(self):
@@ -45,9 +45,9 @@ class GatewayTest(TestCase):
                            body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
                            content_type="application/json")
         item_type = self.gateway._get_item_type('lube')
-        self.assertSequenceEqual(item_type, 'LUBE')
+        self.assertEqual(item_type, 'LUBE')
         item_type = self.gateway._get_item_type('i_do_not_exist')
-        self.assertSequenceEqual(item_type, 'ITEM')
+        self.assertEqual(item_type, 'ITEM')
 
 
     @httprettified

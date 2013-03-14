@@ -57,7 +57,7 @@ def get_mock_order():
     o.lines.all = Mock(return_value=lines)
     o.user = get_auth_user_mock()
     o.is_anonymous = False
-    o.date_placed = datetime.fromtimestamp(100)
+    o.date_placed = datetime.utcfromtimestamp(100)
     return o
 
 def get_mock_review():
@@ -65,7 +65,7 @@ def get_mock_review():
     r.product = get_product_mock()
     r.user = get_auth_user_mock()
     r.score = 4
-    r.date_created = datetime.fromtimestamp(100)
+    r.date_created = datetime.utcfromtimestamp(100)
     return r
 
 
@@ -113,6 +113,10 @@ class EasyRecListenersTest(TestCase):
         HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/buy",
                            body='{"bob": "hoskin"}',
                            content_type="application/json")
+        user = get_auth_user_mock()
+        order = get_mock_order()
+        request = get_mock_request()
+
         expected = {
             'itemid': ['12345'],
             'apikey': ['key'],
@@ -121,13 +125,12 @@ class EasyRecListenersTest(TestCase):
             'itemdescription': ['Product Title'],
             'itemurl': ['http://a.test.com/product/product-title-12345'],
             'sessionid': ['287384'],
-            'actiontime': ['01_01_1970_10_01_40'],
+            'actiontime': ['01_01_1970_00_01_40'],
             'tenantid': ['tenant'],
             'imageurl': ['http://a.test.com/images/12345.jpg']
         }
-        user = get_auth_user_mock()
-        order = get_mock_order()
-        request = get_mock_request()
+
+
         self.listeners.on_post_checkout(self, order, user, request, None)
         get_params = HTTPretty.last_request.querystring
         self.assertEqual(get_params, expected)
@@ -149,7 +152,7 @@ class EasyRecListenersTest(TestCase):
             'itemdescription': ['Product Title'],
             'itemurl': ['http://a.test.com/product/product-title-12345'],
             'sessionid': ['287384'],
-            'actiontime': ['01_01_1970_10_01_40'],
+            'actiontime': ['01_01_1970_00_01_40'],
             'tenantid': ['tenant'],
             'ratingvalue': ['4'],
             'imageurl': ['http://a.test.com/images/12345.jpg']
