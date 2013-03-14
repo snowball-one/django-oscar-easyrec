@@ -294,7 +294,7 @@ class GatewayTest(TestCase):
 
         response = self.gateway.get_other_users_also_bought(**params)
         get_params = HTTPretty.last_request.querystring
-        self.assertItemsEqual(get_params, expected_get_params)
+        self.assertEqual(get_params, expected_get_params)
         self.assertEqual(len(response), 1)
         self.assertEqual(response[0].upc, product.upc)
 
@@ -308,10 +308,10 @@ class GatewayTest(TestCase):
         }
 
         expected_get_params = {
-            "tenantid": "tenant",
-            "apikey": "key",
-            "userid": "auser",
-            "itemid": "1234"
+            "tenantid": ["tenant"],
+            "apikey": ["key"],
+            "userid": ["auser"],
+            "itemid": ["1234"]
         }
         expected_response = '{"recommendeditems": {"item": [{"id": %s}]}}' % product.upc
         HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/otherusersalsoviewed",
@@ -320,7 +320,7 @@ class GatewayTest(TestCase):
 
         response = self.gateway.get_other_users_also_viewed(**params)
         get_params = HTTPretty.last_request.querystring
-        self.assertItemsEqual(get_params, expected_get_params)
+        self.assertEqual(get_params, expected_get_params)
         self.assertEqual(len(response), 1)
         self.assertEqual(response[0].upc, product.upc)
 
@@ -334,10 +334,10 @@ class GatewayTest(TestCase):
         }
 
         expected_get_params = {
-            "tenantid": "tenant",
-            "apikey": "key",
-            "userid": "auser",
-            "itemid": "1234"
+            "tenantid": ["tenant"],
+            "apikey": ["key"],
+            "userid": ["auser"],
+            "itemid": ["1234"]
         }
         expected_response = '{"recommendeditems": {"item": [{"id": %s}]}}' % product.upc
         HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemsratedgoodbyotherusers",
@@ -346,7 +346,7 @@ class GatewayTest(TestCase):
 
         response = self.gateway.get_items_rated_as_good_by_other_users(**params)
         get_params = HTTPretty.last_request.querystring
-        self.assertItemsEqual(get_params, expected_get_params)
+        self.assertEqual(get_params, expected_get_params)
         self.assertEqual(len(response), 1)
         self.assertEqual(response[0].upc, product.upc)
 
@@ -359,9 +359,9 @@ class GatewayTest(TestCase):
         }
 
         expected_get_params = {
-            "tenantid": "tenant",
-            "apikey": "key",
-            "itemid": "1234"
+            "tenantid": ["tenant"],
+            "apikey": ["key"],
+            "itemid": ["1234"]
         }
         expected_response = '{"recommendeditems": {"item": [{"id": %s}]}}' % product.upc
         HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/relateditems",
@@ -370,6 +370,6 @@ class GatewayTest(TestCase):
 
         response = self.gateway.get_related_items(**params)
         get_params = HTTPretty.last_request.querystring
-        self.assertItemsEqual(get_params, expected_get_params)
+        self.assertEqual(get_params, expected_get_params)
         self.assertEqual(len(response), 1)
         self.assertEqual(response[0].upc, product.upc)
