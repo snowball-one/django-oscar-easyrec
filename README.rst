@@ -15,7 +15,7 @@ Getting started
 Installation
 ------------
 
-From PyPi::
+From PyPI::
 
     pip install django-oscar-easyrec
 
@@ -207,4 +207,5 @@ TODO
 ----
 
 * Dashboard stats
+* Ehance sandbox with some more data/products to allow easier testing
 * Optional Celery delayed inserts
