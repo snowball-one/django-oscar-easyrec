@@ -3,8 +3,7 @@ Easyrec package for django-oscar
 ================================
 
 This package provides integration with the recommendation system, `easyrec`_.  It is designed to
-integrate seamlessly with the e-commerce framework `django-oscar`_ but can be used without
-using oscar.
+integrate seamlessly with the e-commerce framework `django-oscar`_.
 
 .. _`easyrec`: http://easyrec.org/
 .. _`django-oscar`: https://github.com/tangentlabs/django-oscar
