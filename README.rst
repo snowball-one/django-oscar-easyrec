@@ -194,7 +194,7 @@ can simply perform the following::
 	vagrant up
 
 The box itself is hosted on Dropbox and the initial download and install will
-take a *long* time.
+take a *long* time. So kick back and tasty hot beverage...
 
 Once the box is up you can acces easyrec using::
 
