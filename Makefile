@@ -13,7 +13,6 @@ sandbox: install
 	sandbox/manage.py oscar_import_catalogue sandbox/fixtures/books-catalogue.csv
 	sandbox/manage.py oscar_import_catalogue_images sandbox/fixtures/books-images.tar.gz
 	sandbox/manage.py loaddata countries.json
-	sandbox/manage.py rebuild_index --noinput
 
 test:
 	./run_tests.py tests/
