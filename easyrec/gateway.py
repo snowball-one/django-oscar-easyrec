@@ -63,7 +63,7 @@ class EasyRec(object):
             options['userid'] = user_id
 
         if image_url:
-            options['imageurl'] = image_url
+            options['itemimageurl'] = image_url
 
         if action_time:
             options['actiontime'] = action_time.strftime("%d_%m_%Y_%H_%M_%S")
@@ -87,7 +87,7 @@ class EasyRec(object):
             options['userid'] = user_id
 
         if image_url:
-            options['imageurl'] = image_url
+            options['itemimageurl'] = image_url
 
         if action_time:
             options['actiontime'] = action_time.strftime("%d_%m_%Y_%H_%M_%S")
@@ -112,7 +112,7 @@ class EasyRec(object):
             options['userid'] = user_id
 
         if image_url:
-            options['imageurl'] = image_url
+            options['itemimageurl'] = image_url
 
         if action_time:
             options['actiontime'] = action_time.strftime("%d_%m_%Y_%H_%M_%S")
@@ -141,7 +141,7 @@ class EasyRec(object):
             options['userid'] = user_id
 
         if image_url:
-            options['imageurl'] = image_url
+            options['itemimageurl'] = image_url
 
         if action_time:
             # dd_MM_yyyy_HH_mm_ss
@@ -220,13 +220,17 @@ class EasyRec(object):
 
     def _recommendations_to_products(self, recommendations):
         upcs = []
-        if ('recommendeditems' not in recommendations
-            or 'item' not in recommendations['recommendeditems']):
+        recommendeditems = recommendations.get('recommendeditems')
+        if not recommendeditems:
             return Product.browsable.none()
-
-        for item in recommendations['recommendeditems']['item']:
+        items = recommendeditems.get('item')
+        if not items:
+            return Product.browsable.none()
+        # if only a single recommendation it is not returned as a list
+        if "id" in items:
+            items = [items]
+        for item in items:
             upcs.append(item['id'])
-
         return Product.browsable.filter(upc__in=upcs)
 
     def _get_item_based_recommendation(self, recommendation_type, **kwargs):

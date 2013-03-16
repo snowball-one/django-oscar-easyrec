@@ -23,12 +23,21 @@ def user_recommendations(
     Sets [var] to contain a list of recommended titles
     for the passed in user
     """
-    return easyrec.get_user_recommendations(
-        user.id,
-        max_results,
-        requested_item_type,
-        action_type
-    )
+    if not user.is_authenticated():
+        return Product.objects.none()
+
+    if action_type:
+        action_type = action_type.upper()
+
+    try:
+        return easyrec.get_user_recommendations(
+            user.id,
+            max_results,
+            requested_item_type,
+            action_type
+        )
+    except:
+        return Product.objects.none()
 
 
 @register.assignment_tag

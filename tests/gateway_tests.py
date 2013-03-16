@@ -16,6 +16,7 @@ class GatewayTest(TestCase):
 
     def setUp(self):
         self.gateway = EasyRec("http://some.com", 'tenant', 'key')
+        self.maxDiff = 1000
 
     def test_base_url_is_checked(self):
         self.assertRaises(RuntimeError, EasyRec, "some.com", 'tenant', 'key')
@@ -98,7 +99,7 @@ class GatewayTest(TestCase):
             "itemurl": ["http://a-shop.com/items/1234/"],
             "itemtype": ['ITEM'],
             "userid": ["123"],
-            "imageurl": ["http://a-shop/image.jpg"],
+            "itemimageurl": ["http://a-shop/image.jpg"],
             "actiontime": [params["action_time"].strftime("%d_%m_%Y_%H_%M_%S")],
         }
 
@@ -136,7 +137,7 @@ class GatewayTest(TestCase):
             "itemurl": ["http://a-shop.com/items/1234/"],
             "itemtype": ['ITEM'],
             "userid": ["123"],
-            "imageurl": ["http://a-shop/image.jpg"],
+            "itemimageurl": ["http://a-shop/image.jpg"],
             "actiontime": [params["action_time"].strftime("%d_%m_%Y_%H_%M_%S")]
         }
 
@@ -176,7 +177,7 @@ class GatewayTest(TestCase):
             "itemtype": ['ITEM'],
             "ratingvalue": ["5"],
             "userid": ["123"],
-            "imageurl": ["http://a-shop/image.jpg"],
+            "itemimageurl": ["http://a-shop/image.jpg"],
             "actiontime": [params["action_time"].strftime("%d_%m_%Y_%H_%M_%S")]
         }
 
@@ -217,7 +218,7 @@ class GatewayTest(TestCase):
             "itemtype": ['ITEM'],
             "actiontype": ["like"],
             "userid": ["123"],
-            "imageurl": ["http://a-shop/image.jpg"],
+            "itemimageurl": ["http://a-shop/image.jpg"],
             "actiontime": [params["action_time"].strftime("%d_%m_%Y_%H_%M_%S")],
             "actionvalue": ["7"]
         }

@@ -19,6 +19,11 @@ Getting started
 Installation
 ------------
 
+.. note::
+
+    django-oscar-easyrec requires django-oscar 0.5 or above. So currently requires
+    you to use the lastest head from github.
+
 From PyPI::
 
     pip install django-oscar-easyrec
@@ -30,6 +35,10 @@ or from Github::
 Add ``'easyrec'`` to ``INSTALLED_APPS``.
 
 You will also need to install 
+
+Instructions for installing Easyrec can be found on `easyrec's sourceforge wiki`_
+
+.. _`easyrec's sourceforge wiki`: http://easyrec.sourceforge.net/wiki/index.php?title=Installation_Guide
 
 Configuration
 -------------
@@ -125,7 +134,7 @@ action_type
 users_also_bought
 -----------------
 
-Returns a list of recommended items based on users who bought this all bought X
+Returns a list of recommended items based on users who bought this also bought X
 
 parameters:
 
@@ -141,7 +150,7 @@ requested_item_type
 users_also_viewed
 -----------------
 
-Returns a list of recommended items based on users who viewed this all viewed X
+Returns a list of recommended items based on users who viewed this also viewed X
 
 parameters:
 
@@ -226,9 +235,49 @@ Once the box is up you can access easyrec using::
 The username and password to log in are both `easyrec`. The box also runs
 MySQL (`root`:`root`) and Tomcat-admin (`tomcat`:`tomcat`)
 
+The Sandbox
+===========
+
+The sandbox provided with django-oscar-easyrec allows you provides some
+examples on how you can integrate easyrec with your own sites. To get the
+sandbox up and running use from the projects root directory::
+
+    make sandbox
+
+This will install django-oscar-easyrec in development modes, installed the
+development requirements.txt and build the initial database. You can then run
+the sandbox using:
+
+    cd sandbox
+    ./manage.py runserver
+
+You will need to create your own super user with::
+
+    cd sandbox
+    ./manage createsuperuser
+
+The easyrec rules builder is scheduled to run daily (2 am by default). So once
+you have performed some actions (browse, buy etc.) you need to manually run the
+rules builders to get any recommendations. To do this in easyrec you will need
+to log in::
+
+    http://127/0/0/1:9090/easyrec-web
+
+.. warning::
+    Make sure you perform the actions with multiple users. Easyrec won't
+    recommend rules derived from the current users own actions.
+
+Then click on 'administration'. In the row representing your tenant, in the
+'Management' section click on the icon that looks like a puzzle piece with an
+arrow on it. Wait a few secs and your done.
+
+Examples of using the template tags can be found in:
+
+- sandbox/templates/promotions/home.html
+- sandbox/templates/catalogue/detail.html
+
 TODO
 ----
 
 * Dashboard stats
-* Ehance sandbox with some more data/products to allow easier testing
 * Optional Celery delayed inserts

@@ -41,6 +41,7 @@ def get_mock_request():
     r = Mock()
     r.session = Mock()
     r.session.session_key = '287384'
+    r.build_absolute_uri = lambda x: x
     return r
 
 def get_mock_order():
@@ -98,7 +99,7 @@ class EasyRecListenersTest(TestCase):
             'itemurl': ['http://a.test.com/product/product-title-12345'],
             'sessionid': ['287384'],
             'tenantid': ['tenant'],
-            'imageurl': ['http://a.test.com/images/12345.jpg']
+            'itemimageurl': ['http://a.test.com/images/12345.jpg']
         }
 
         self.listeners.on_product_view(self, product, user, request)
@@ -127,7 +128,7 @@ class EasyRecListenersTest(TestCase):
             'sessionid': ['287384'],
             'actiontime': ['01_01_1970_00_01_40'],
             'tenantid': ['tenant'],
-            'imageurl': ['http://a.test.com/images/12345.jpg']
+            'itemimageurl': ['http://a.test.com/images/12345.jpg']
         }
 
 
@@ -155,7 +156,7 @@ class EasyRecListenersTest(TestCase):
             'actiontime': ['01_01_1970_00_01_40'],
             'tenantid': ['tenant'],
             'ratingvalue': ['4'],
-            'imageurl': ['http://a.test.com/images/12345.jpg']
+            'itemimageurl': ['http://a.test.com/images/12345.jpg']
         }
 
         user = get_auth_user_mock()
