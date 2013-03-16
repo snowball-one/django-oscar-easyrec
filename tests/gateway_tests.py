@@ -327,6 +327,10 @@ class GatewayTest(TestCase):
 
     @httprettified
     def test_get_items_rated_as_good_by_other_users(self):
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemtypes",
+                           body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
+                           content_type="application/json")
+
         product = G(Product, parent=None)
 
         params = {
@@ -370,6 +374,161 @@ class GatewayTest(TestCase):
                            content_type="application/json")
 
         response = self.gateway.get_related_items(**params)
+        get_params = HTTPretty.last_request.querystring
+        self.assertEqual(get_params, expected_get_params)
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0].upc, product.upc)
+
+    @httprettified
+    def test_get_most_viewed_items(self):
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemtypes",
+                           body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
+                           content_type="application/json")
+        product = G(Product, parent=None)
+
+        params = {
+            "max_results": 1,
+            "requested_item_type": "ITEM",
+            "time_range": 'week'
+        }
+
+        expected_get_params = {
+            "tenantid": ["tenant"],
+            "apikey": ["key"],
+            "numberOfResults": ["1"],
+            "requesteditemtype": ["ITEM"],
+            "timeRange": ["WEEK"]
+        }
+        expected_response = '{"recommendeditems": {"item": [{"id": %s}]}}' % product.upc
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/mostvieweditems",
+                           body=expected_response,
+                           content_type="application/json")
+
+        response = self.gateway.get_most_viewed_items(**params)
+        get_params = HTTPretty.last_request.querystring
+        self.assertEqual(get_params, expected_get_params)
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0].upc, product.upc)
+
+    @httprettified
+    def test_get_most_bought_items(self):
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemtypes",
+                           body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
+                           content_type="application/json")
+        product = G(Product, parent=None)
+
+        params = {
+            "max_results": 1,
+            "requested_item_type": "ITEM",
+            "time_range": 'week'
+        }
+
+        expected_get_params = {
+            "tenantid": ["tenant"],
+            "apikey": ["key"],
+            "numberOfResults": ["1"],
+            "requesteditemtype": ["ITEM"],
+            "timeRange": ["WEEK"]
+        }
+        expected_response = '{"recommendeditems": {"item": [{"id": %s}]}}' % product.upc
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/mostboughtitems",
+                           body=expected_response,
+                           content_type="application/json")
+
+        response = self.gateway.get_most_bought_items(**params)
+        get_params = HTTPretty.last_request.querystring
+        self.assertEqual(get_params, expected_get_params)
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0].upc, product.upc)
+
+    @httprettified
+    def test_get_most_rated_items(self):
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemtypes",
+                           body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
+                           content_type="application/json")
+        product = G(Product, parent=None)
+
+        params = {
+            "max_results": 1,
+            "requested_item_type": "ITEM",
+            "time_range": 'week'
+        }
+
+        expected_get_params = {
+            "tenantid": ["tenant"],
+            "apikey": ["key"],
+            "numberOfResults": ["1"],
+            "requesteditemtype": ["ITEM"],
+            "timeRange": ["WEEK"]
+        }
+        expected_response = '{"recommendeditems": {"item": [{"id": %s}]}}' % product.upc
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/mostrateditems",
+                           body=expected_response,
+                           content_type="application/json")
+
+        response = self.gateway.get_most_rated_items(**params)
+        get_params = HTTPretty.last_request.querystring
+        self.assertEqual(get_params, expected_get_params)
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0].upc, product.upc)
+
+    @httprettified
+    def test_get_best_rated_items(self):
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemtypes",
+                           body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
+                           content_type="application/json")
+        product = G(Product, parent=None)
+
+        params = {
+            "max_results": 1,
+            "requested_item_type": "ITEM",
+            "time_range": 'week'
+        }
+
+        expected_get_params = {
+            "tenantid": ["tenant"],
+            "apikey": ["key"],
+            "numberOfResults": ["1"],
+            "requesteditemtype": ["ITEM"],
+            "timeRange": ["WEEK"]
+        }
+        expected_response = '{"recommendeditems": {"item": [{"id": %s}]}}' % product.upc
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/bestrateditems",
+                           body=expected_response,
+                           content_type="application/json")
+
+        response = self.gateway.get_best_rated_items(**params)
+        get_params = HTTPretty.last_request.querystring
+        self.assertEqual(get_params, expected_get_params)
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0].upc, product.upc)
+
+    @httprettified
+    def test_get_worst_rated_items(self):
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/itemtypes",
+                           body='{"itemTypes": {"itemType": ["ITEM", "LUBE"]}}',
+                           content_type="application/json")
+        product = G(Product, parent=None)
+
+        params = {
+            "max_results": 1,
+            "requested_item_type": "ITEM",
+            "time_range": 'week'
+        }
+
+        expected_get_params = {
+            "tenantid": ["tenant"],
+            "apikey": ["key"],
+            "numberOfResults": ["1"],
+            "requesteditemtype": ["ITEM"],
+            "timeRange": ["WEEK"]
+        }
+        expected_response = '{"recommendeditems": {"item": [{"id": %s}]}}' % product.upc
+        HTTPretty.register_uri(HTTPretty.GET, "http://some.com/api/1.0/json/worstrateditems",
+                           body=expected_response,
+                           content_type="application/json")
+
+        response = self.gateway.get_worst_rated_items(**params)
         get_params = HTTPretty.last_request.querystring
         self.assertEqual(get_params, expected_get_params)
         self.assertEqual(len(response), 1)

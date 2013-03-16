@@ -7,11 +7,23 @@ from easyrec.errors import EasyRecException
 
 Product = get_model('catalogue', 'Product')
 
+TIME_RANGE_DAY = 'DAY'
+TIME_RANGE_WEEK = 'WEEK'
+TIME_RANGE_MONTH = 'MONTH'
+TIME_RANGE_ALL = 'ALL'
+
+TIME_RANGES = (
+    TIME_RANGE_DAY,
+    TIME_RANGE_WEEK,
+    TIME_RANGE_MONTH,
+    TIME_RANGE_ALL
+)
 
 class EasyRec(object):
 
     _base_url = "api/1.0/json/"
     _default_item_type = 'ITEM'
+    _default_time_range = TIME_RANGE_ALL
 
     def __init__(self, endpoint, tenant, api_key):
         if not endpoint.startswith('http'):
@@ -22,30 +34,8 @@ class EasyRec(object):
         self._tenant = tenant
         self._api_key = api_key
         self._requests = requests
-        self.initialised = False
 
-    def get_item_types(self):
-        if hasattr(self, "_item_types"):
-            return self._item_types
-        url = self._build_url('itemtypes')
-        options = {
-            'apikey': self._api_key,
-            'tenantid': self._tenant
-        }
-        try:
-            response = self._fetch_response(url, params=options)
-        except:
-            return ['ITEM',]
-        try:
-            return response['itemTypes']['itemType']
-        except KeyError:
-            return ['ITEM',]
-
-    def _get_item_type(self, item_type):
-        item_type = item_type.upper()
-        if item_type in self.get_item_types():
-            return item_type
-        return self._default_item_type
+    # Actions
 
     def add_view(self, session_id, item_id, item_desc, item_url,
                  item_type='ITEM', user_id=None, image_url=None,
@@ -150,6 +140,8 @@ class EasyRec(object):
         url = self._build_url('rate')
         return self._fetch_response(url, params=options)
 
+    # Recommendations
+
     def get_user_recommendations(self, user_id, max_results=None,
         requested_item_type=None, action_type=None):
         options = {
@@ -209,7 +201,7 @@ class EasyRec(object):
 
 
     def get_related_items(self, item_id, max_results=None, assoc_type=None,
-                                    requested_item_type=None):
+                          requested_item_type=None):
         kwargs = {
             'item_id': item_id,
             'max_results': max_results,
@@ -217,21 +209,6 @@ class EasyRec(object):
             'requested_item_type': requested_item_type
         }
         return self._get_item_based_recommendation('relateditems', **kwargs)
-
-    def _recommendations_to_products(self, recommendations):
-        upcs = []
-        recommendeditems = recommendations.get('recommendeditems')
-        if not recommendeditems:
-            return Product.browsable.none()
-        items = recommendeditems.get('item')
-        if not items:
-            return Product.browsable.none()
-        # if only a single recommendation it is not returned as a list
-        if "id" in items:
-            items = [items]
-        for item in items:
-            upcs.append(item['id'])
-        return Product.browsable.filter(upc__in=upcs)
 
     def _get_item_based_recommendation(self, recommendation_type, **kwargs):
         options = {
@@ -261,6 +238,107 @@ class EasyRec(object):
         recommendations = self._fetch_response(url, params=options)
         return self._recommendations_to_products(recommendations)
 
+    # Community rankings
+
+    def get_most_viewed_items(self, time_range=None, max_results=None,
+                              requested_item_type=None):
+        kwargs = {
+            'time_range': time_range,
+            'max_results': max_results,
+            'requested_item_type': requested_item_type
+        }
+        return self._get_community_rankings('mostvieweditems', **kwargs)
+
+    def get_most_bought_items(self, time_range=None, max_results=None,
+                              requested_item_type=None):
+        kwargs = {
+            'time_range': time_range,
+            'max_results': max_results,
+            'requested_item_type': requested_item_type
+        }
+        return self._get_community_rankings('mostboughtitems', **kwargs)
+
+    def get_most_rated_items(self, time_range=None, max_results=None,
+                              requested_item_type=None):
+        kwargs = {
+            'time_range': time_range,
+            'max_results': max_results,
+            'requested_item_type': requested_item_type
+        }
+        return self._get_community_rankings('mostrateditems', **kwargs)
+
+    def get_best_rated_items(self, time_range=None, max_results=None,
+                              requested_item_type=None):
+        kwargs = {
+            'time_range': time_range,
+            'max_results': max_results,
+            'requested_item_type': requested_item_type
+        }
+        return self._get_community_rankings('bestrateditems', **kwargs)
+
+    def get_worst_rated_items(self, time_range=None, max_results=None,
+                              requested_item_type=None):
+        kwargs = {
+            'time_range': time_range,
+            'max_results': max_results,
+            'requested_item_type': requested_item_type
+        }
+        return self._get_community_rankings('worstrateditems', **kwargs)
+
+    def _get_community_rankings(self, ranking_type, **kwargs):
+        options = {
+            'apikey': self._api_key,
+            'tenantid': self._tenant,
+        }
+
+        if kwargs.get('max_results'):
+            options['numberOfResults'] = kwargs['max_results']
+
+        if kwargs.get('requested_item_type'):
+            options['requesteditemtype'] = self._get_item_type(
+                kwargs['requested_item_type']
+            )
+
+        if kwargs.get('time_range'):
+            options['timeRange'] = self._get_time_range(
+                    kwargs['time_range']
+            )
+
+        url = self._build_url(ranking_type)
+        recommendations = self._fetch_response(url, params=options)
+        return self._recommendations_to_products(recommendations)
+
+    # Utitlities
+
+    def get_item_types(self):
+        if hasattr(self, "_item_types"):
+            return self._item_types
+        url = self._build_url('itemtypes')
+        options = {
+            'apikey': self._api_key,
+            'tenantid': self._tenant
+        }
+        try:
+            response = self._fetch_response(url, params=options)
+        except:
+            return ['ITEM',]
+        try:
+            return response['itemTypes']['itemType']
+        except KeyError:
+            return ['ITEM',]
+
+    def _get_item_type(self, item_type):
+        item_type = item_type.upper()
+        if item_type in self.get_item_types():
+            return item_type
+        return self._default_item_type
+
+    def _get_time_range(self, time_range):
+        time_range = time_range.upper()
+        if time_range in TIME_RANGES:
+            return time_range
+        return self._default_time_range
+
     def _build_url(self, path):
         if path.startswith('/'):
             path = path[1:]
@@ -279,6 +357,21 @@ class EasyRec(object):
         content = response.json()
         self.check_response_for_errors(content)
         return content
+
+    def _recommendations_to_products(self, recommendations):
+        upcs = []
+        recommendeditems = recommendations.get('recommendeditems')
+        if not recommendeditems:
+            return Product.browsable.none()
+        items = recommendeditems.get('item')
+        if not items:
+            return Product.browsable.none()
+        # if only a single recommendation it is not returned as a list
+        if "id" in items:
+            items = [items]
+        for item in items:
+            upcs.append(item['id'])
+        return Product.browsable.filter(upc__in=upcs)
 
     def check_response_for_errors(self, json):
         if json.get('error', False):

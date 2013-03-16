@@ -34,7 +34,7 @@ or from Github::
 
 Add ``'easyrec'`` to ``INSTALLED_APPS``.
 
-You will also need to install 
+You will also need to install
 
 Instructions for installing Easyrec can be found on `easyrec's sourceforge wiki`_
 
@@ -200,6 +200,52 @@ assoc_type
 requested_item_type
     [optional] The ProductClass of the items you want in the response
 
+Getting Rankings
+================
+
+Also provided are a collection of template tags for getting community rankings
+of products. Thing like most bought or best rated products::
+
+    {% load rankings %}
+
+    {% most_viewed as products %}
+    {% for product in products %}
+        <!-- Do your thing! -->
+    {% endfor %}
+
+    {% most_bought as products %}
+    {% for product in products %}
+        <!-- Do your thing! -->
+    {% endfor %}
+
+    {% most_rated as products %}
+    {% for product in products %}
+        <!-- Do your thing! -->
+    {% endfor %}
+
+    {% best_rated as products %}
+    {% for product in products %}
+        <!-- Do your thing! -->
+    {% endfor %}
+
+    {% worst_rated as products %}
+    {% for product in products %}
+        <!-- Do your thing! -->
+    {% endfor %}
+
+Parameters
+----------
+
+All the community rankings share the same options parameters:
+
+time_range
+    [optional] The range over which you want the ranking. Options include:
+    day, week, month, all
+max_results
+    [optional] The maximum number of products you want
+requested_item_type
+    [optional] A filter on the type of products you want returned
+
 Contributing
 ============
 
@@ -271,10 +317,14 @@ Then click on 'administration'. In the row representing your tenant, in the
 'Management' section click on the icon that looks like a puzzle piece with an
 arrow on it. Wait a few secs and your done.
 
-Examples of using the template tags can be found in:
+Examples of using the recommendations template tags can be found in:
 
 - sandbox/templates/promotions/home.html
 - sandbox/templates/catalogue/detail.html
+
+An example of the rankings template tags can be found in:
+
+- sandbox/templates/promotions/home.html
 
 TODO
 ----

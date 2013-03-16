@@ -1,7 +1,12 @@
 {% extends "oscar/promotions/home.html" %}
 {% load recommendations %}
+{% load rankings %}
 
 {% block content %}
-{% user_recommendations request.user action_type="view" as recommendations %}
-{% include "partials/recommendations.html" with recommendations=recommendations name="Recommended for you" %}
+    {{ block.super }}
+    {% user_recommendations request.user action_type="view" as recommendations %}
+    {% include "partials/recommendations.html" with recommendations=recommendations name="Recommended for you" %}
+
+    {% most_viewed as products %}
+    {% include "partials/recommendations.html" with recommendations=products name="Most viewed product" %}
 {% endblock content %}
