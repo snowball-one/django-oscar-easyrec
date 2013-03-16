@@ -10,7 +10,7 @@ setup(name='django-oscar-easyrec',
       long_description=open('README.rst').read(),
       keywords="Recommendation, easyrec",
       license='BSD',
-      packages=find_packages(exclude=['tests*',]),
+      packages=find_packages(exclude=['tests','sandbox']),
       install_requires=[
             'django-oscar>=0.5-pre-alpha',
             'requests>=1.1.0,<1.2'
