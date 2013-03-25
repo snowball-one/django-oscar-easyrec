@@ -1,5 +1,5 @@
-from easyrec.receivers import EasyRecListeners
-from easyrec.utils import get_gateway
+from .receivers import EasyRecListeners
+from .utils import get_gateway
 
 
 easyrec = get_gateway()

@@ -66,9 +66,6 @@ def configure(nose_args=None):
                 os.path.join(OSCAR_MAIN_TEMPLATE_DIR, 'templates'),
                 OSCAR_MAIN_TEMPLATE_DIR,
             ),
-            FANCYPAGES_TEMPLATE_DIRS=[
-                location('templates/fancypages/pages'),
-            ],
             INSTALLED_APPS=[
                 'django.contrib.auth',
                 'django.contrib.contenttypes',
@@ -127,14 +124,9 @@ if __name__ == '__main__':
         configure(['-v'])
         run_tests()
     else:
-        # If no args, then use 'progressive' plugin to keep the screen real estate
-        # used down to a minimum. Otherwise, use the spec plugin
         nose_args = ['-s', '-x', '--with-specplugin']
 
         if options.coverage:
-            # Nose automatically uses any options passed to runtests.py, which is
-            # why the coverage trigger uses '--with-coverage' and why we don't need
-            # to explicitly include it here.
             nose_args.extend([
                 '--cover-package=easyrec', '--cover-html',
                 '--cover-html-dir=htmlcov'])

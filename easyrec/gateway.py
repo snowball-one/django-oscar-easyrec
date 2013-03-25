@@ -2,7 +2,7 @@ import requests
 
 from django.db.models import get_model
 
-from easyrec.errors import EasyRecException
+from .errors import EasyRecException
 
 
 Product = get_model('catalogue', 'Product')

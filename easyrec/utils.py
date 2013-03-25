@@ -1,7 +1,7 @@
 from django.conf import settings
 
 
-from easyrec.gateway import EasyRec, DummyRequests
+from .gateway import EasyRec, DummyRequests
 
 
 def get_gateway():
