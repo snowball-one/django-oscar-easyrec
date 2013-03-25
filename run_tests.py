@@ -129,7 +129,7 @@ if __name__ == '__main__':
     else:
         # If no args, then use 'progressive' plugin to keep the screen real estate
         # used down to a minimum. Otherwise, use the spec plugin
-        nose_args = ['-s', '-x', '--with-spec']
+        nose_args = ['-s', '-x', '--with-specplugin']
 
         if options.coverage:
             # Nose automatically uses any options passed to runtests.py, which is
