@@ -13,6 +13,9 @@ Continuous integration status:
 .. image:: https://secure.travis-ci.org/tangentlabs/django-oscar-easyrec.png
     :target: http://travis-ci.org/#!/tangentlabs/django-oscar-easyrec
 
+.. image:: https://coveralls.io/repos/tangentlabs/django-oscar-easyrec/badge.png?branch=master
+    :target: https://coveralls.io/r/django-oscar-easyrec
+
 Getting started
 ===============
 

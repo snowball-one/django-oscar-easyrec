@@ -17,7 +17,8 @@ sandbox: install
 test:
 	./run_tests.py tests/
 
-travis: install test
-
+travis: install
+	./run_tests.py --with-coverage tests
+	coveralls
 docs:
 	$(MAKE) -C docs html

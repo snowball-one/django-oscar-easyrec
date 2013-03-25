@@ -10,6 +10,7 @@
 .ropeproject
 .coverage
 .vagrant
+.coveralls.yml
 
 django_oscar_easyrec.egg-info/
 

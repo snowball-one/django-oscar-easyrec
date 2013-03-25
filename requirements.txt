@@ -1,4 +1,4 @@
-coverage==3.5.1
+coverage==3.6
 mock==0.7.0
 django-nose==1.0
 nose==1.1.2
@@ -7,3 +7,4 @@ django-debug-toolbar==0.9.4
 django-dynamic-fixture==1.6.4
 httpretty==0.5.10
 pinocchio==0.3.1
+coveralls==0.1.1
