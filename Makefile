@@ -15,10 +15,11 @@ sandbox: install
 	sandbox/manage.py loaddata countries.json
 
 test:
-	./run_tests.py tests/
+	./run_tests.py
 
 travis: install
-	./run_tests.py --with-coverage tests
+	./run_tests.py --cover-erase --with-coverage --cover-package=easyrec --cover-html --cover-html-dir=coverage
 	coveralls
+
 docs:
 	$(MAKE) -C docs html

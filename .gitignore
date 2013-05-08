@@ -18,3 +18,4 @@ dist/
 docs/build/
 public/
 htmlcov/
+coverage
