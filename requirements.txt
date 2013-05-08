@@ -7,3 +7,4 @@ django-dynamic-fixture==1.6.4
 httpretty==0.5.10
 spec==0.10.0
 coveralls==0.1.1
+argparse==1.2.1
