@@ -26,5 +26,5 @@ if __name__ == '__main__':
     options, args = parser.parse_known_args()
 
     print 'Running tests'
-    args += ['--with-specplugin', '-s', '-x']
+    args += ['-s', '-x']
     run_tests(options.verbosity, *args)
