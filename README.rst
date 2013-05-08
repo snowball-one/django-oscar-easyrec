@@ -22,11 +22,6 @@ Getting started
 Installation
 ------------
 
-.. note::
-
-    django-oscar-easyrec requires django-oscar 0.5 or above. So currently requires
-    you to use the lastest head from github.
-
 From PyPI::
 
     pip install django-oscar-easyrec
