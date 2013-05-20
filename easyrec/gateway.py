@@ -3,7 +3,8 @@ import requests
 from django.db.models import get_model
 
 from .errors import EasyRecException
-
+import logging
+logger = logging.getLogger(__name__)
 
 Product = get_model('catalogue', 'Product')
 
@@ -323,7 +324,8 @@ class EasyRec(object):
         except:
             return ['ITEM',]
         try:
-            return response['itemTypes']['itemType']
+            self._item_types = response['itemTypes']['itemType']
+            return self._item_types
         except KeyError:
             return ['ITEM',]
 
@@ -353,10 +355,16 @@ class EasyRec(object):
             'POST': self._requests.post
         }.get(method, self._requests.get)
         response = func(url, params=params)
+        logger.debug("%s: %s %s" % (method, url, params))
         response.raise_for_status()
+        logger.debug("%s: %s" % (
+            response.status_code,
+            response.text
+        ))
         content = response.json()
         self.check_response_for_errors(content)
         return content
+
 
     def _recommendations_to_products(self, recommendations):
         upcs = []

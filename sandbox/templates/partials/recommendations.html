@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load product_tags %}
 {% if recommendations %}
 <section class="well">
     <div class="sub-header">
@@ -9,7 +10,7 @@
         <div class="es-carousel">
             <ul class="products">
                 {% for product in recommendations %}
-                <li>{% include "promotions/partials/product_carousel.html" %}</li>
+                <li>{% render_product product %}</li>
                 {% endfor %}
             </ul>
         </div>
