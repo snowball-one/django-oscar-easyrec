@@ -96,7 +96,7 @@ class EasyRecListeners():
     def register_listeners(self):
         product_viewed.connect(self.on_product_view,
                                dispatch_uid="easyrec_product_viewed")
-        post_checkout.connect(self.on_product_view,
+        post_checkout.connect(self.on_post_checkout,
                              dispatch_uid="easyrec_order_placed")
         review_added.connect(self.on_review_added,
                           dispatch_uid="easyrec_review_created")

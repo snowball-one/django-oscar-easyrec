@@ -354,13 +354,13 @@ class EasyRec(object):
             'GET': self._requests.get,
             'POST': self._requests.post
         }.get(method, self._requests.get)
-        response = func(url, params=params)
         logger.debug("%s: %s %s" % (method, url, params))
-        response.raise_for_status()
+        response = func(url, params=params)
         logger.debug("%s: %s" % (
             response.status_code,
             response.text
         ))
+        response.raise_for_status()
         content = response.json()
         self.check_response_for_errors(content)
         return content
