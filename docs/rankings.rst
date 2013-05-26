@@ -38,7 +38,7 @@ Provides the most purchased items
 
 
 ``most_rated``
--------------
+--------------
 
 Products with the most rating. This is not the best rated products, but those
 that have the greatest number of ratings in total, high or low.
