@@ -41,4 +41,4 @@ Instructions for installing Easyrec can be found on `easyrec's sourceforge wiki`
 
 Full documentation is available at `Read the Docs`_
 
-.. _ `Read the Docs`: https://django-oscar-easyrec.readthedocs.org/en/latest/
+.. _`Read the Docs`: https://django-oscar-easyrec.readthedocs.org/en/latest/
