@@ -1,5 +1,5 @@
 from unittest import TestCase
-from mock import Mock, patch
+from mock import Mock
 from json import dumps
 
 from django.template import Template, Context
@@ -8,8 +8,6 @@ from django.db.models import get_model
 
 from httpretty import HTTPretty
 from httpretty import httprettified
-
-from easyrec.gateway import EasyRec
 
 
 Product = get_model('catalogue','Product')
@@ -69,8 +67,8 @@ class RecommendationsTests(TestCase):
         rendered =  Template(
             '{% load recommendations %}'
             '{% user_recommendations user as recommendations %}'
-            '{% for p in recommendations %}'
-            '{{ p.upc }}'
+            '{% for r in recommendations %}'
+            '{{ r.product.upc }}'
             '{% endfor %}'
         ).render(Context({
             'user': get_auth_user_mock()
@@ -85,8 +83,8 @@ class RecommendationsTests(TestCase):
         rendered =  Template(
             '{% load recommendations %}'
             '{% products_rated_good product user as recommendations %}'
-            '{% for p in recommendations %}'
-            '{{ p.upc }}'
+            '{% for r in recommendations %}'
+            '{{ r.product.upc }}'
             '{% endfor %}'
         ).render(Context({
             'product': G(Product),
@@ -102,8 +100,8 @@ class RecommendationsTests(TestCase):
         rendered =  Template(
             '{% load recommendations %}'
             '{% related_products product user as recommendations %}'
-            '{% for p in recommendations %}'
-            '{{ p.upc }}'
+            '{% for r in recommendations %}'
+            '{{ r.product.upc }}'
             '{% endfor %}'
         ).render(Context({
             'product': G(Product),
@@ -119,8 +117,8 @@ class RecommendationsTests(TestCase):
         rendered =  Template(
             '{% load recommendations %}'
             '{% users_also_viewed product user as recommendations %}'
-            '{% for p in recommendations %}'
-            '{{ p.upc }}'
+            '{% for r in recommendations %}'
+            '{{ r.product.upc }}'
             '{% endfor %}'
         ).render(Context({
             'product': G(Product),
@@ -136,8 +134,8 @@ class RecommendationsTests(TestCase):
         rendered =  Template(
             '{% load recommendations %}'
             '{% users_also_bought product user as recommendations %}'
-            '{% for p in recommendations %}'
-            '{{ p.upc }}'
+            '{% for r in recommendations %}'
+            '{{ r.product.upc }}'
             '{% endfor %}'
         ).render(Context({
             'product': G(Product),

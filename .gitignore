@@ -15,7 +15,7 @@
 django_oscar_easyrec.egg-info/
 
 dist/
-docs/build/
+docs/_build/
 public/
 htmlcov/
 coverage

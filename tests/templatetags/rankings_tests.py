@@ -1,5 +1,5 @@
 from unittest import TestCase
-from mock import Mock, patch
+from mock import Mock
 from json import dumps
 
 from django.template import Template, Context
@@ -8,8 +8,6 @@ from django.db.models import get_model
 
 from httpretty import HTTPretty
 from httpretty import httprettified
-
-from easyrec.gateway import EasyRec
 
 
 Product = get_model('catalogue','Product')
@@ -58,8 +56,8 @@ class RankingsTest(TestCase):
         rendered =  Template(
             '{% load rankings %}'
             '{% most_viewed as recommendations %}'
-            '{% for p in recommendations %}'
-            '{{ p.upc }}'
+            '{% for r in recommendations %}'
+            '{{ r.product.upc }}'
             '{% endfor %}'
         ).render(Context())
         self.assertEqual(self.product.upc, rendered)
@@ -75,8 +73,8 @@ class RankingsTest(TestCase):
         rendered =  Template(
             '{% load rankings %}'
             '{% most_bought as recommendations %}'
-            '{% for p in recommendations %}'
-            '{{ p.upc }}'
+            '{% for r in recommendations %}'
+            '{{ r.product.upc }}'
             '{% endfor %}'
         ).render(Context())
         self.assertEqual(self.product.upc, rendered)
@@ -92,8 +90,8 @@ class RankingsTest(TestCase):
         rendered =  Template(
             '{% load rankings %}'
             '{% most_rated as recommendations %}'
-            '{% for p in recommendations %}'
-            '{{ p.upc }}'
+            '{% for r in recommendations %}'
+            '{{ r.product.upc }}'
             '{% endfor %}'
         ).render(Context())
         self.assertEqual(self.product.upc, rendered)
@@ -109,8 +107,8 @@ class RankingsTest(TestCase):
         rendered =  Template(
             '{% load rankings %}'
             '{% best_rated as recommendations %}'
-            '{% for p in recommendations %}'
-            '{{ p.upc }}'
+            '{% for r in recommendations %}'
+            '{{ r.product.upc }}'
             '{% endfor %}'
         ).render(Context())
         self.assertEqual(self.product.upc, rendered)
@@ -126,8 +124,8 @@ class RankingsTest(TestCase):
         rendered =  Template(
             '{% load rankings %}'
             '{% worst_rated as recommendations %}'
-            '{% for p in recommendations %}'
-            '{{ p.upc }}'
+            '{% for r in recommendations %}'
+            '{{ r.product.upc }}'
             '{% endfor %}'
         ).render(Context())
         self.assertEqual(self.product.upc, rendered)

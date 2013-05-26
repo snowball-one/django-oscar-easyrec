@@ -162,6 +162,6 @@ class EasyRecListenersTest(TestCase):
         user = get_auth_user_mock()
         review = get_mock_review()
         request = get_mock_request()
-        self.listeners.on_review_added(self, review, user, request, None)
+        self.listeners.on_review_added(self, review, user, request)
         get_params = HTTPretty.last_request.querystring
         self.assertEqual(get_params, expected)

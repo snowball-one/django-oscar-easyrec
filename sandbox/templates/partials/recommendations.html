@@ -9,8 +9,10 @@
     <div class="es-carousel-wrapper">
         <div class="es-carousel">
             <ul class="products">
-                {% for product in recommendations %}
-                <li>{% render_product product %}</li>
+                {% for recommendation in recommendations %}
+                <li>
+                    {% include "partials/recommended_product.html" %}
+                </li>
                 {% endfor %}
             </ul>
         </div>
