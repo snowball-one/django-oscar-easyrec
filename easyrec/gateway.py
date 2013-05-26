@@ -6,7 +6,6 @@ from .errors import EasyRecException
 import logging
 logger = logging.getLogger(__name__)
 
-Product = get_model('catalogue', 'Product')
 
 TIME_RANGE_DAY = 'DAY'
 TIME_RANGE_WEEK = 'WEEK'
@@ -19,6 +18,7 @@ TIME_RANGES = (
     TIME_RANGE_MONTH,
     TIME_RANGE_ALL
 )
+
 
 class EasyRec(object):
 
@@ -365,21 +365,31 @@ class EasyRec(object):
         self.check_response_for_errors(content)
         return content
 
-
     def _recommendations_to_products(self, recommendations):
-        upcs = []
         recommendeditems = recommendations.get('recommendeditems')
         if not recommendeditems:
-            return Product.browsable.none()
+            return []
         items = recommendeditems.get('item')
         if not items:
-            return Product.browsable.none()
+            return []
         # if only a single recommendation it is not returned as a list
         if "id" in items:
             items = [items]
+        url_map = {}
+        upcs = []
         for item in items:
-            upcs.append(item['id'])
-        return Product.browsable.filter(upc__in=upcs)
+            upc = item.get('id')
+            upcs.append(upc)
+            url_map[upc] = item.get('url')
+        Product = get_model('catalogue', 'Product')
+        products = Product.browsable.filter(upc__in=upcs)
+        results = []
+        for product in products:
+            results.append({
+                "product": product,
+                "tracking_url": url_map.get(product.upc)
+            })
+        return results
 
     def check_response_for_errors(self, json):
         if json.get('error', False):

@@ -137,6 +137,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'django.contrib.flatpages',
 
     'django_extensions',
     'sorl.thumbnail',
@@ -220,3 +221,4 @@ INTERNAL_IPS = ('127.0.0.1',)
 EASYREC_ENDPOINT = 'http://127.0.0.1:9090/easyrec-web'
 EASYREC_TENANT_ID = 'EASYREC_DEMO'
 EASYREC_API_KEY = '8ab9dc3ffcdac576d0f298043a60517a'
+EASYREC_ASYNC = False

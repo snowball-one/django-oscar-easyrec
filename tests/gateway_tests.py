@@ -262,7 +262,7 @@ class GatewayTest(TestCase):
         get_params = HTTPretty.last_request.querystring
         self.assertEqual(get_params, expected_get_params)
         self.assertEqual(len(response), 1)
-        self.assertEqual(response[0].upc, product.upc)
+        self.assertEqual(response[0]['product'].upc, product.upc)
 
     @httprettified
     def test_get_other_users_also_bought(self):
@@ -297,7 +297,7 @@ class GatewayTest(TestCase):
         get_params = HTTPretty.last_request.querystring
         self.assertEqual(get_params, expected_get_params)
         self.assertEqual(len(response), 1)
-        self.assertEqual(response[0].upc, product.upc)
+        self.assertEqual(response[0]['product'].upc, product.upc)
 
     @httprettified
     def test_get_other_users_also_viewed(self):
@@ -323,7 +323,7 @@ class GatewayTest(TestCase):
         get_params = HTTPretty.last_request.querystring
         self.assertEqual(get_params, expected_get_params)
         self.assertEqual(len(response), 1)
-        self.assertEqual(response[0].upc, product.upc)
+        self.assertEqual(response[0]['product'].upc, product.upc)
 
     @httprettified
     def test_get_items_rated_as_good_by_other_users(self):
@@ -353,7 +353,7 @@ class GatewayTest(TestCase):
         get_params = HTTPretty.last_request.querystring
         self.assertEqual(get_params, expected_get_params)
         self.assertEqual(len(response), 1)
-        self.assertEqual(response[0].upc, product.upc)
+        self.assertEqual(response[0]['product'].upc, product.upc)
 
     @httprettified
     def test_get_related_items(self):
@@ -377,7 +377,7 @@ class GatewayTest(TestCase):
         get_params = HTTPretty.last_request.querystring
         self.assertEqual(get_params, expected_get_params)
         self.assertEqual(len(response), 1)
-        self.assertEqual(response[0].upc, product.upc)
+        self.assertEqual(response[0]['product'].upc, product.upc)
 
     @httprettified
     def test_get_most_viewed_items(self):
@@ -408,7 +408,7 @@ class GatewayTest(TestCase):
         get_params = HTTPretty.last_request.querystring
         self.assertEqual(get_params, expected_get_params)
         self.assertEqual(len(response), 1)
-        self.assertEqual(response[0].upc, product.upc)
+        self.assertEqual(response[0]['product'].upc, product.upc)
 
     @httprettified
     def test_get_most_bought_items(self):
@@ -439,7 +439,7 @@ class GatewayTest(TestCase):
         get_params = HTTPretty.last_request.querystring
         self.assertEqual(get_params, expected_get_params)
         self.assertEqual(len(response), 1)
-        self.assertEqual(response[0].upc, product.upc)
+        self.assertEqual(response[0]['product'].upc, product.upc)
 
     @httprettified
     def test_get_most_rated_items(self):
@@ -470,7 +470,7 @@ class GatewayTest(TestCase):
         get_params = HTTPretty.last_request.querystring
         self.assertEqual(get_params, expected_get_params)
         self.assertEqual(len(response), 1)
-        self.assertEqual(response[0].upc, product.upc)
+        self.assertEqual(response[0]['product'].upc, product.upc)
 
     @httprettified
     def test_get_best_rated_items(self):
@@ -501,7 +501,7 @@ class GatewayTest(TestCase):
         get_params = HTTPretty.last_request.querystring
         self.assertEqual(get_params, expected_get_params)
         self.assertEqual(len(response), 1)
-        self.assertEqual(response[0].upc, product.upc)
+        self.assertEqual(response[0]['product'].upc, product.upc)
 
     @httprettified
     def test_get_worst_rated_items(self):
@@ -532,4 +532,4 @@ class GatewayTest(TestCase):
         get_params = HTTPretty.last_request.querystring
         self.assertEqual(get_params, expected_get_params)
         self.assertEqual(len(response), 1)
-        self.assertEqual(response[0].upc, product.upc)
+        self.assertEqual(response[0]['product'].upc, product.upc)
