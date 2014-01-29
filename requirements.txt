@@ -8,3 +8,5 @@ httpretty==0.5.10
 spec==0.10.0
 coveralls==0.1.1
 argparse==1.2.1
+bumpversion==0.4.0
+sphinx_rtd_theme>=1.1
