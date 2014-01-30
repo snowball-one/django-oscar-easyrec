@@ -1,13 +1,18 @@
 #!/bin/bash
 
-RELEASE_NUM=`./setup.py --version`
-git tag | grep $RELEASE_NUM > /dev/null && \
-echo "New version number required ($RELEASE_NUM already used)" && exit 1
+parts="patch minor major"
 
-# Push to PyPi
+die() {
+    echo >&2 "$@"
+    exit 1
+}
+
+if [ -z "$1" ] || ! [[ "$parts" =~ "$1" ]]
+    then
+        die "You must specify a version part to bump (patch, minor, major)"
+fi
+
+bumpversion $1 
 ./setup.py sdist upload
-
-# Tag in Git
-git tag $RELEASE_NUM -m "Tagging release $RELEASE_NUM"
 git push origin --tags
 git push origin master
