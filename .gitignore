@@ -15,6 +15,7 @@
 django_oscar_easyrec.egg-info/
 
 dist/
+build/
 docs/_build/
 public/
 htmlcov/

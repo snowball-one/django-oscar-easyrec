@@ -14,5 +14,6 @@ fi
 
 bumpversion $1 
 ./setup.py sdist upload
+./setup.py bdist_wheel upload
 git push origin --tags
 git push origin master
