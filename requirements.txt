@@ -1,12 +1,20 @@
-coverage==3.5.2
-mock==1.0.1
-django-nose==1.1
-django_extensions==1.0.3
-django-debug-toolbar==0.9.4
-django-dynamic-fixture==1.6.4
-httpretty==0.5.10
-spec==0.10.0
-coveralls==0.1.1
-argparse==1.2.1
-bumpversion==0.4.0
-sphinx_rtd_theme>=1.1
+# Testing
+coverage
+mock
+django-nose
+django-dynamic-fixture
+httpretty
+spec
+coveralls
+
+# Dev tools
+django_extensions
+django-debug-toolbar
+pudb
+ipython
+bumpversion
+
+# Documentation
+Sphinx
+docutils
+sphinx_rtd_theme
