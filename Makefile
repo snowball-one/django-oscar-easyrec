@@ -5,6 +5,7 @@ install:
 	pip install -r requirements.txt
 
 sandbox: install
+	# Remove previous db file if it exists
 	-rm -f sandbox/sandbox/db.sqlite3
 	# Create database
 	sandbox/manage.py syncdb --noinput
