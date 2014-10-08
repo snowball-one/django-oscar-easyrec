@@ -30,7 +30,7 @@
         {% include "catalogue/partials/stock_record.html" %}
         {% endwith%}
         {% if product.is_group %}
-            <a class="btn btn-full" href="{% url catalogue:detail recommendation.product.slug recommendation.product.id %}">
+            <a class="btn btn-full" href="{% url 'catalogue:detail' recommendation.product.slug recommendation.product.id %}">
                 {% trans "View" %}
             </a>
         {% else %}

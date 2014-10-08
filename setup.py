@@ -12,8 +12,8 @@ setup(name='django-oscar-easyrec',
       license='BSD',
       packages=find_packages(exclude=['tests','sandbox']),
       install_requires=[
-            'django-oscar>=0.5,<0.7',
-            'requests>=1.1.0,<1.2'
+            'django-oscar>=0.5,<0.8',
+            'requests>=1.1.0'
       ],
       classifiers=['Environment :: Web Environment',
                    'Framework :: Django',

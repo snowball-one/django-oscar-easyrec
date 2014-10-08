@@ -20,6 +20,7 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': '',
         'PORT': '',
+        'ATOMIC_REQUESTS': True
     }
 }
 
@@ -220,5 +221,5 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 EASYREC_ENDPOINT = 'http://127.0.0.1:9090/easyrec-web'
 EASYREC_TENANT_ID = 'EASYREC_DEMO'
-EASYREC_API_KEY = '8ab9dc3ffcdac576d0f298043a60517a'
+EASYREC_API_KEY = '6491d97a8a0c3f7d07b1df5d83a83521'
 EASYREC_ASYNC = False
