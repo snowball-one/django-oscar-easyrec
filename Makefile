@@ -1,4 +1,4 @@
-.PHONY: docs
+.PHONY: install sandbox test travis docs
 
 install:
 	pip install -e .
