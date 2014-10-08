@@ -10,8 +10,6 @@ coveralls
 # Dev tools
 django_extensions
 django-debug-toolbar
-pudb
-ipython
 
 # Documentation
 Sphinx
