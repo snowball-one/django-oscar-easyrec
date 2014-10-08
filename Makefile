@@ -1,7 +1,7 @@
 .PHONY: docs
 
 install:
-	python setup.py develop --upgrade
+	pip install -e .
 	pip install -r requirements.txt
 
 sandbox: install

@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 
 setup(name='django-oscar-easyrec',
-      version='0.0.8',
+      version='0.0.9',
       url='https://github.com/tangentlabs/django-oscar-easyrec',
       author="Jonathan Moss",
       author_email="jonathan.moss@tangentsnowball.com.au",
