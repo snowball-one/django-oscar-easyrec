@@ -13,8 +13,8 @@ Continuous integration status:
 .. image:: https://travis-ci.org/snowball-one/django-oscar-easyrec.svg?branch=master
     :target: https://travis-ci.org/snowball-one/django-oscar-easyrec
 
-.. image:: https://coveralls.io/repos/tangentlabs/django-oscar-easyrec/badge.png?branch=master
-    :target: https://coveralls.io/r/tangentlabs/django-oscar-easyrec
+.. image:: https://coveralls.io/repos/snowball-one/django-oscar-easyrec/badge.png?branch=master
+    :target: https://coveralls.io/r/snowball-one/django-oscar-easyrec
 
 Getting started
 ===============
@@ -28,7 +28,7 @@ From PyPI::
 
 or from Github::
 
-    pip install git+git://github.com/tangentlabs/django-oscar-easyrec.git#egg=django-oscar-easyrec
+    pip install git+git://github.com/snowball-one/django-oscar-easyrec.git#egg=django-oscar-easyrec
 
 Add ``'easyrec'`` to ``INSTALLED_APPS``.
 
